@@ -16,6 +16,9 @@ Rails.application.routes.draw do
       post "generate_auth_token" => 'base#generate_auth_token', defaults: { :format => 'json' }
       delete "revoke_auth_token" => 'base#revoke_auth_token', defaults: { :format => 'json' }
       get "auth_token_valid" => 'base#auth_token_valid', defaults: { :format => 'json' }
+      get "nmta_groups" => 'groups#nmta_groups',  defaults: { :format => 'json' }
+      get "nmta_prospect_groups" => 'groups#nmta_prospect_groups',  defaults: { :format => 'json' }
+
 
       resources :parties, defaults: { :format => 'json' } do
         member do

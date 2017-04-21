@@ -14,9 +14,19 @@ class Group < ActiveRecord::Base
   after_destroy :destroy_party_relationships, :destroy_party
 
   has_one :party, :as => :business_party
+  has_one :group_type
 
-  attr_accessible :description
+  attr_accessible :description, :group_type_id
   validates_uniqueness_of :description, :case_sensitive => false
+
+  def self.add_with_type(description, group_type)
+    Group.create(:description => description, :group_type_id => group_type.id)
+  end
+
+  def self.by_group_type(group_type)
+    Group.where('group_type_id = ?', group_type.id)
+  end
+
 
   def self.add(description)
     Group.create(:description => description)

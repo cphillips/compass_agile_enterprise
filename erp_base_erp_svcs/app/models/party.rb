@@ -241,6 +241,13 @@ class Party < ActiveRecord::Base
     PartyRole.create(party: self, role_type: role)
   end
 
+  def remove_role_type(role)
+    role = role.is_a?(RoleType) ? role : RoleType.iid(role)
+
+    PartyRole.find_by_party_id_and_role_type_id(self.id,role.id).delete
+
+  end
+
   def has_role_type?(*passed_roles)
     result = false
     passed_roles.flatten!
