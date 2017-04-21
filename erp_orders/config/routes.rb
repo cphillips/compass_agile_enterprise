@@ -6,6 +6,7 @@ Rails.application.routes.draw do
       resources :order_txns, defaults: { :format => 'json' } do
         member do
           put :update_status
+          get :related_order_txns
         end
         resources :charge_lines
       end

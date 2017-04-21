@@ -155,6 +155,11 @@ class WorkEffort < ActiveRecord::Base
       end
 
       # filter by project
+      unless filters[:project_id].blank?
+        statement = statement.where(work_efforts_tbl[:project_id].eq(filters[:project_id]))
+      end
+
+      # filter by projects
       unless filters[:project_ids].blank?
         statement = statement.where(work_efforts_tbl[:project_id].in(filters[:project_ids]))
       end

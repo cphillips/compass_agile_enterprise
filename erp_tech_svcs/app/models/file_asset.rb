@@ -22,28 +22,28 @@ require 'fileutils'
 
 Paperclip.interpolates(:file_path) { |data, style|
   case ErpTechSvcs::Config.file_storage
-    when :filesystem
-      file_support = ErpTechSvcs::FileSupport::Base.new
-      File.join(file_support.root, data.instance.directory, data.instance.name)
-    when :s3
-      File.join(data.instance.directory, data.instance.name)
+  when :filesystem
+    file_support = ErpTechSvcs::FileSupport::Base.new
+    File.join(file_support.root, data.instance.directory, data.instance.name)
+  when :s3
+    File.join(data.instance.directory, data.instance.name)
   end
 }
 
 Paperclip.interpolates(:file_url) { |data, style|
   url = File.join(data.instance.directory, data.instance.name)
   case ErpTechSvcs::Config.file_storage
-    when :filesystem
-      #if public is at the front of this path and we are using file_system remove it
-      dir_pieces = url.split('/')
-      unless dir_pieces[1] == 'public'
-        "/download/#{data.instance.name}?path=#{dir_pieces.delete_if { |name| name == data.instance.name }.join('/')}"
-      else
-        dir_pieces.delete_at(1) if dir_pieces[1] == 'public'
-        dir_pieces.join('/')
-      end
-    when :s3
-      url
+  when :filesystem
+    #if public is at the front of this path and we are using file_system remove it
+    dir_pieces = url.split('/')
+    unless dir_pieces[1] == 'public'
+      "/download/#{data.instance.name}?path=#{dir_pieces.delete_if { |name| name == data.instance.name }.join('/')}"
+    else
+      dir_pieces.delete_at(1) if dir_pieces[1] == 'public'
+      dir_pieces.join('/')
+    end
+  when :s3
+    url
   end
 }
 
@@ -83,13 +83,13 @@ class FileAsset < ActiveRecord::Base
 
   #paperclip
   has_attached_file :data,
-                    :storage => ErpTechSvcs::Config.file_storage,
-                    :s3_protocol => ErpTechSvcs::Config.s3_protocol,
-                    :s3_permissions => :public_read,
-                    :s3_credentials => "#{Rails.root}/config/s3.yml",
-                    :path => ":file_path",
-                    :url => (ErpTechSvcs::Config.file_storage == :filesystem ? ":file_url" : (ErpTechSvcs::Config.s3_url || ":file_url")),
-                    :validations => {:extension => lambda { |data, file| validate_extension(data, file) }}
+    :storage => ErpTechSvcs::Config.file_storage,
+    :s3_protocol => ErpTechSvcs::Config.s3_protocol,
+    :s3_permissions => :public_read,
+    :s3_credentials => "#{Rails.root}/config/s3.yml",
+    :path => ":file_path",
+    :url => (ErpTechSvcs::Config.file_storage == :filesystem ? ":file_url" : (ErpTechSvcs::Config.s3_url || ":file_url")),
+    :validations => {:extension => lambda { |data, file| validate_extension(data, file) }}
 
   before_post_process :set_content_type
   before_save :save_dimensions
@@ -174,10 +174,10 @@ class FileAsset < ActiveRecord::Base
 
       if filters[:file_asset_holder_type].present? && filters[:file_asset_holder_id].present?
         statement = statement.joins(:file_asset_holders)
-                        .where(file_asset_holders: {
-                                   file_asset_holder_id: filters[:file_asset_holder_id],
-                                   file_asset_holder_type: filters[:file_asset_holder_type]
-                               })
+        .where(file_asset_holders: {
+                 file_asset_holder_id: filters[:file_asset_holder_id],
+                 file_asset_holder_type: filters[:file_asset_holder_type]
+        })
       end
 
       if filters[:scopes]
@@ -248,10 +248,10 @@ class FileAsset < ActiveRecord::Base
 
   def fully_qualified_url
     case ErpTechSvcs::Config.file_storage
-      when :filesystem
-        "#{ErpTechSvcs::Config.file_protocol}://#{File.join(ErpTechSvcs::Config.installation_domain, data.url)}"
-      when :s3
-        data.url
+    when :filesystem
+      "#{ErpTechSvcs::Config.file_protocol}://#{File.join(ErpTechSvcs::Config.installation_domain, data.url)}"
+    when :s3
+      data.url
     end
   end
 
@@ -345,6 +345,23 @@ class FileAsset < ActiveRecord::Base
 
   def set_sti
     update_attribute :type, @type
+  end
+
+  def replace!(old_path, new_path, contents)
+    file_support = ErpTechSvcs::FileSupport::Base.new(:storage => ErpTechSvcs::Config.file_storage)
+
+    file_support.replace_file(File.join(file_support.root, old_path),
+                              File.join(file_support.root, new_path),
+                              contents)
+
+    new_name = ::File.basename(new_path)
+    new_dir = ::File.dirname(new_path)
+
+    self.name = new_name
+    self.directory = new_dir
+    self.save!
+
+    set_data_file_name
   end
 
   def set_content_type

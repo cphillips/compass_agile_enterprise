@@ -50,7 +50,7 @@ module ActionView
       end
     end
 
-    def query(path, details, formats)
+    def query(path, details, formats, outside_app_allowed=nil)
       file_support = ErpTechSvcs::FileSupport::Base.new(:storage => :s3)
       templates = []
       get_dir_entries(path, file_support).each{|p|templates << build_template(p, path.virtual, formats, file_support)}

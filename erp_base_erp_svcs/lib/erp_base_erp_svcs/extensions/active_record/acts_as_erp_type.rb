@@ -20,6 +20,8 @@ module ErpBaseErpSvcs
 
           def acts_as_erp_type
 
+            validates_exclusion_of :internal_identifier, :in => %w[root roots children child id lft rgt parent_id level parent ancestors self_and_ancestors siblings self_and_siblings descendants self_and_descendants leaves]
+
             # this is at the class level
             # add any class level manipulations you need here, like has_many, etc.
             extend ActsAsErpType::ActsAsSingletonMethods

@@ -1,4 +1,4 @@
-module Api
+module API
   module V1
     class OrderTxnsController < BaseController
 
@@ -131,6 +131,37 @@ module Api
         render :json => {:success => true}
       end
 
+=begin
+
+  @api {put} /api/v1/order_txns/:id/related_order_txns RelatedOrders
+  @apiVersion 1.0.0
+  @apiName RelatedOrderTxns
+  @apiGroup OrderTxn
+
+  @apiParam {type} type of order to find
+
+  @apiSuccess {Boolean} success True if the request was successful
+  @apiSuccess {Array} order_txns Related OrderTxn records
+
+=end     
+
+      def related_order_txns
+        order_txn = OrderTxn.find(params[:id])
+
+        order_txns = OrderTxn.joins(:biz_txn_event).joins('inner join biz_txn_relationships on biz_txn_relationships.txn_event_id_from = biz_txn_events.id')
+        .where(biz_txn_relationships: {txn_event_id_to: order_txn.root_txn.id})
+
+        if params[:type]
+          order_txns = order_txns.joins(:bix_txn_type).where(biz_txn_types: {internal_identiifer: params[:type]})
+        end
+
+        total_count = order_txns.count
+
+        render :json => {success: true,
+                         total_count: total_count,
+                         order_txns: order_txns.collect(&:to_data_hash)}
+      end
+
     end # OrderTxnsController
   end # V1
-end # Api
+end # API

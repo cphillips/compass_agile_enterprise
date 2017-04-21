@@ -1,4 +1,4 @@
-module Api
+module API
   module V1
     class InventoryTxnsController < BaseController
 
@@ -74,4 +74,4 @@ module Api
 
     end # InventoryTxnsController
   end # V1
-end # Api
+end # API

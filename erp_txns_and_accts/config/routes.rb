@@ -5,6 +5,10 @@ Rails.application.routes.draw do
 
       resources :biz_txn_events, defaults: { :format => 'json' } do
       	resources :biz_txn_party_roles, defaults: { :format => 'json' }
+
+        member do
+          put :update_status
+        end
       end
 
       resources :biz_txn_party_roles, defaults: { :format => 'json' }

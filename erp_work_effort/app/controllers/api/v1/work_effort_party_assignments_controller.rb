@@ -1,4 +1,4 @@
-module Api
+module API
   module V1
     class WorkEffortPartyAssignmentsController < BaseController
 
@@ -24,8 +24,6 @@ module Api
 
       def index
         query_filter = params[:query_filter].blank? ? {} : JSON.parse(params[:query_filter]).symbolize_keys
-        limit = params[:limit] || 25
-        start = params[:start] || 0
 
         work_effort_party_assignments = WorkEffortPartyAssignment
 
@@ -42,7 +40,14 @@ module Api
         work_effort_party_assignments = work_effort_party_assignments.uniq
 
         total_count = work_effort_party_assignments.count
-        work_effort_party_assignments = work_effort_party_assignments.offset(start).limit(limit)
+
+        unless params[:limit].blank?
+          work_effort_party_assignments = work_effort_party_assignments.limit(params[:limit])
+        end
+
+        unless params[:start].blank?
+          work_effort_party_assignments = work_effort_party_assignments.offset(params[:start])
+        end
 
         render :json => {
                    success: true,
@@ -204,4 +209,4 @@ module Api
 
     end # WorkEffortPartyAssignmentsController
   end # V1
-end # Api
+end # API

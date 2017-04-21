@@ -1,4 +1,4 @@
-module Api
+module API
   module V1
     class ChargeLinesController < BaseController
 
@@ -175,4 +175,4 @@ module Api
 
     end # ChargeLinesController
   end # V1
-end # Api
+end # API

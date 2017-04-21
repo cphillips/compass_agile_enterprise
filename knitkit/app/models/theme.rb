@@ -5,11 +5,7 @@ class Theme < ActiveRecord::Base
   attr_protected :created_at, :updated_at
 
   THEME_STRUCTURE = ['stylesheets', 'javascripts', 'images', 'templates', 'fonts']
-  class << self
-    attr_accessor :base_layouts_views_path, :knitkit_website_stylesheets_path,
-                  :knitkit_website_images_path, :knitkit_website_javascripts_path,
-                  :knitkit_website_fonts_path
-  end
+
   @base_layouts_views_path = "#{Knitkit::Engine.root.to_s}/app/views"
   @knitkit_website_stylesheets_path = "#{Knitkit::Engine.root.to_s}/app/assets/stylesheets/knitkit"
   @knitkit_website_javascripts_path = "#{Knitkit::Engine.root.to_s}/app/assets/javascripts/knitkit"
@@ -18,6 +14,15 @@ class Theme < ActiveRecord::Base
 
   protected_with_capabilities
   has_file_assets
+
+
+  validates :name, :presence => {:message => 'Name cannot be blank'}
+  validates_uniqueness_of :theme_id, :scope => :website_id, :case_sensitive => false
+
+  belongs_to :website
+
+  extend FriendlyId
+  friendly_id :name, :use => [:slugged, :scoped], :slug_column => :theme_id, :scope => [:website_id]
 
   def import_download_item_file(file)
     file_support = ErpTechSvcs::FileSupport::Base.new(:storage => Rails.application.config.erp_tech_svcs.file_storage)
@@ -54,7 +59,20 @@ class Theme < ActiveRecord::Base
     activate!
   end
 
+  def should_generate_new_friendly_id?
+    new_record?
+  end
+
+  validates :name, :presence => {:message => 'Name cannot be blank'}
+  validates_uniqueness_of :theme_id, :scope => :website_id, :case_sensitive => false
+
+  before_destroy :delete_theme_files!
+
   class << self
+    attr_accessor :base_layouts_views_path, :knitkit_website_stylesheets_path,
+                  :knitkit_website_images_path, :knitkit_website_javascripts_path,
+                  :knitkit_website_fonts_path
+
     def import_download_item(tempfile, website)
       name_and_id = tempfile.gsub(/(^.*(\\|\/))|(\.zip$)/, '')
       theme_name = name_and_id.split('[').first
@@ -63,7 +81,6 @@ class Theme < ActiveRecord::Base
         theme.import_download_item_file(tempfile)
       end
     end
-
 
     def find_theme_root_from_file(file)
       theme_root = ''
@@ -78,7 +95,6 @@ class Theme < ActiveRecord::Base
       theme_root
     end
 
-
     def root_dir
       @@root_dir ||= "#{Rails.root}/public"
     end
@@ -87,16 +103,32 @@ class Theme < ActiveRecord::Base
       "#{root_dir}/sites/#{website.iid}/themes"
     end
 
-    def import(file, website)
-      name_and_id = file.original_filename.to_s.gsub(/(^.*(\\|\/))|(\.zip$)/, '')
-      theme_name = name_and_id.split('[').first
-      theme_id = name_and_id.split('[').last.gsub(']', '')
-      return false unless valid_theme?(file)
-      theme = Theme.create(:name => theme_name, :theme_id => theme_id, :website => website).tap do |theme|
-        theme.import(file)
+    def import(file_path, website, auto_activate=false)
+      # if the path to the file is passed just use it else get the path from
+      # the File object that was passed
+      if file_path.is_a?(String)
+        name_and_id = File.basename(file_path).to_s.gsub(/(^.*(\\|\/))|(\.zip$)/, '')
+      else
+        name_and_id = File.basename(file_path.original_filename).to_s.gsub(/(^.*(\\|\/))|(\.zip$)/, '')
+
+        if file_path.path
+          file_path = file_path.path
+        else
+          file = ActionController::UploadedTempfile.new("uploaded-website").tap do |f|
+            f.puts file_path.read
+            f.original_filename = file_path.original_filename
+            f.read # no idea why we need this here, otherwise the zip can't be opened
+          end
+          file_path = file.path
+        end
       end
 
-      theme
+      theme_name = name_and_id.split('[').first
+      theme_id = name_and_id.split('[').last.gsub(']', '')
+      return false unless valid_theme?(file_path)
+      Theme.create(:name => theme_name, :theme_id => theme_id, :website => website).tap do |theme|
+        theme.import(file_path, auto_activate)
+      end
     end
 
     def make_tmp_dir
@@ -105,9 +137,9 @@ class Theme < ActiveRecord::Base
       end
     end
 
-    def valid_theme?(file)
+    def valid_theme?(file_path)
       valid = false
-      Zip::ZipFile.open(file.path) do |zip|
+      Zip::ZipFile.open(file_path) do |zip|
         zip.sort.each do |entry|
           entry.name.split('/').each do |file|
             valid = true if THEME_STRUCTURE.include?(file)
@@ -116,15 +148,36 @@ class Theme < ActiveRecord::Base
       end
       valid
     end
-  end
 
-  belongs_to :website
+    def find_theme_root(file_path)
+      theme_root = ''
+      Zip::ZipFile.open(file_path) do |zip|
+        zip.each do |entry|
+          entry.name.sub!(/__MACOSX\//, '')
+          if theme_root = root_in_path(entry.name)
+            break
+          end
+        end
+      end
+      theme_root
+    end
 
-  extend FriendlyId
-  friendly_id :name, :use => [:slugged, :scoped], :slug_column => :theme_id, :scope => [:website_id]
+    def root_in_path(path)
+      root_found = false
+      theme_root = ''
+      path.split('/').each do |piece|
+        if piece == 'about.yml' || THEME_STRUCTURE.include?(piece)
+          root_found = true
+        else
+          theme_root += piece + '/' if !piece.match('\.') && !root_found
+        end
+      end
+      root_found ? theme_root : false
+    end
 
-  def should_generate_new_friendly_id?
-    new_record?
+    def strip_path(file_name, path)
+      file_name.sub(path, '')
+    end
   end
 
   validates :name, :presence => {:message => 'Name cannot be blank'}
@@ -175,17 +228,11 @@ class Theme < ActiveRecord::Base
     end
   end
 
-  def import(file)
+  def import(file_path, auto_activate=false)
     file_support = ErpTechSvcs::FileSupport::Base.new(:storage => Rails.application.config.erp_tech_svcs.file_storage)
-    file = ActionController::UploadedTempfile.new("uploaded-theme").tap do |f|
-      f.puts file.read
-      f.original_filename = file.original_filename
-      f.read # no idea why we need this here, otherwise the zip can't be opened
-    end unless file.path
+    theme_root = Theme.find_theme_root(file_path)
 
-    theme_root = Theme.find_theme_root(file)
-
-    Zip::ZipFile.open(file.path) do |zip|
+    Zip::ZipFile.open(file_path) do |zip|
       zip.each do |entry|
         if entry.name == 'about.yml'
           data = ''
@@ -197,24 +244,27 @@ class Theme < ActiveRecord::Base
           self.homepage = about['homepage'] if about['homepage']
           self.summary = about['summary'] if about['summary']
         else
-          if entry.file?
-            name = entry.name.sub(/__MACOSX\//, '')
-            name = Theme.strip_path(name, theme_root)
-            data = ''
-            entry.get_input_stream { |io| data = io.read }
-            data = StringIO.new(data) if data.present?
-            theme_file = self.files.where("name = ? and directory = ?", File.basename(name), File.join(self.url, File.dirname(name))).first
-            unless theme_file.nil?
-              theme_file.data = data
-              theme_file.save
-            else
-              self.add_file(data, File.join(file_support.root, self.url, name)) rescue next
-            end
+          name = entry.name.sub(/__MACOSX\//, '')
+          name = Theme.strip_path(name, theme_root)
+          data = ''
+          entry.get_input_stream { |io| data = io.read }
+          data = StringIO.new(data) if data.present?
+          theme_file = self.files.where("name = ? and directory = ?", File.basename(name), File.join(self.url, File.dirname(name))).first
+          unless theme_file.nil?
+            theme_file.data = data
+            theme_file.save
+          else
+            self.add_file(data, File.join(file_support.root, self.url, name))
           end
         end
       end
     end
 
+    if auto_activate
+      self.activate!
+    end
+
+    self
   end
 
   def export
@@ -239,38 +289,6 @@ class Theme < ActiveRecord::Base
 
   def has_template?(directory, name)
     self.templates.find { |item| item.directory == File.join(path, directory).gsub(Rails.root.to_s, '') and item.name == name }
-  end
-
-  class << self
-    def find_theme_root(file)
-      theme_root = ''
-      Zip::ZipFile.open(file.path) do |zip|
-        zip.each do |entry|
-          entry.name.sub!(/__MACOSX\//, '')
-          if theme_root = root_in_path(entry.name)
-            break
-          end
-        end
-      end
-      theme_root
-    end
-
-    def root_in_path(path)
-      root_found = false
-      theme_root = ''
-      path.split('/').each do |piece|
-        if piece == 'about.yml' || THEME_STRUCTURE.include?(piece)
-          root_found = true
-        else
-          theme_root += piece + '/' if !piece.match('\.') && !root_found
-        end
-      end
-      root_found ? theme_root : false
-    end
-
-    def strip_path(file_name, path)
-      file_name.sub(path, '')
-    end
   end
 
   def delete_theme_files!
@@ -331,4 +349,3 @@ class Theme < ActiveRecord::Base
 
   end
 end
-

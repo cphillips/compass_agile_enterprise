@@ -1,4 +1,4 @@
-module Api
+module API
   module V1
     class WorkEffortAssociationsController < BaseController
 
@@ -192,4 +192,4 @@ module Api
 
     end # WorkEffortAssociationsController
   end # V1
-end # Api
+end # API

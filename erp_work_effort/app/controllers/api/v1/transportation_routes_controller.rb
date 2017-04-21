@@ -1,4 +1,4 @@
-module Api
+module API
   module V1
     class TransportationRoutesController < BaseController
 
@@ -6,4 +6,4 @@ module Api
 
     end # TransportationRoutesController
   end # V1
-end # Api
+end # API

@@ -189,9 +189,9 @@ module ErpTechSvcs
 
       def to_tree_hash(options={}, context={})
         if options[:child_ids]
-          _children = self.children.where(id: options[:child_ids])
+          _children = self.children.except(:order).order('description asc').where(id: options[:child_ids])
         else
-          _children = self.children
+          _children = self.children.except(:order).order('description asc')
         end
 
         options = {
@@ -215,9 +215,9 @@ module ErpTechSvcs
 
       def children_to_tree_hash(options={}, context={})
         if options[:child_ids]
-          _children = self.children.where(id: options[:child_ids])
+          _children = self.children.except(:order).order('description asc').where(id: options[:child_ids])
         else
-          _children = self.children
+          _children = self.children.except(:order).order('description asc')
         end
 
         _children.collect { |child| child.to_tree_hash(options) }

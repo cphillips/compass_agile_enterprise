@@ -1,4 +1,4 @@
-module Api
+module API
   module V1
     class BizTxnAcctRootsController < BaseController
 
@@ -115,4 +115,4 @@ module Api
 
     end # BizTxnAcctRootsController
   end # V1
-end # Api
+end # API

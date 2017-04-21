@@ -1,4 +1,4 @@
-module Api
+module API
   module V1
     module Extensions
       module BizTxnEventFilters
@@ -22,9 +22,9 @@ module Api
       end # BizTxnEventFilters
     end # Extensions
   end # V1
-end # Api
+end # API
 
-BizTxnEvent.singleton_class.prepend Api::V1::Extensions::BizTxnEventFilters
+BizTxnEvent.singleton_class.prepend API::V1::Extensions::BizTxnEventFilters
 
 BizTxnEvent.class_eval do
 

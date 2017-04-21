@@ -1,4 +1,4 @@
-module Api
+module API
   module V1
     class ContactPurposesController < BaseController
 
@@ -21,4 +21,4 @@ module Api
 
     end # ContactPurposesController
   end # V1
-end # Api
+end # API

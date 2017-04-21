@@ -1,4 +1,4 @@
-module Api
+module API
   module V1
     class NoteTypesController < BaseController
 
@@ -24,4 +24,4 @@ module Api
 
     end # NoteTypesController
   end # V1
-end # Api
+end # API

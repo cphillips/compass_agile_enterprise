@@ -488,7 +488,7 @@ Ext.define("Compass.ErpApp.Desktop.Applications.Knitkit.CenterRegion", {
                 title: fileName + '.' + fileType,
                 itemId: itemId,
                 layout: 'fit',
-                html: '<img src="' + node.data.url + '" />'
+                html: '<img src="' + node.get('url') + '&token=' +  Math.round(Math.random() * 10000000) + '" />'
             });
 
             self.workArea.add(item);

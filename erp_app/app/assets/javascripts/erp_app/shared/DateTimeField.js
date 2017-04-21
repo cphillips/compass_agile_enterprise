@@ -44,32 +44,32 @@ Ext.define('Ext.ux.form.DateTimeField', {
         increment: 30,
         flex: 1,
         itemId: 'time',
-        listConfig: {
-            initDate: Ext.Date.format(Ext.Date.add(new Date(), Ext.Date.MONTH, -1), "Y,n,j").split(",")
-        },
         listeners: {
             change: function(field, newValue, oldValue) {
                 var fieldContainer = field.up('datetimefield');
 
-                var _oldValue = oldValue;
-                var _newValue = newValue;
-
+                var _oldValue = null;
+                var _newValue = null;
                 var date = fieldContainer.dateField.getValue();
 
-                if (_oldValue) {
+                if (oldValue) {
+                    _oldValue = new Date(oldValue.valueOf());
+
                     _oldValue.setMonth(date.getMonth());
                     _oldValue.setFullYear(date.getFullYear());
                     _oldValue.setDate(date.getDate());
                 }
 
-                if (_newValue) {
+                if (newValue) {
+                    _newValue = new Date(newValue.valueOf());
+
                     _newValue.setMonth(date.getMonth());
                     _newValue.setFullYear(date.getFullYear());
                     _newValue.setDate(date.getDate());
                 }
 
                 if (fieldContainer.fireEvent('change', fieldContainer, _newValue, _oldValue) === false) {
-                    field.setValue(oldValue);
+                    field.setValue(new Date(2008, 0, 1, oldValue.getHours(), oldValue.getMinutes(), oldValue.getSeconds()));
                 }
             }
         }
@@ -125,7 +125,10 @@ Ext.define('Ext.ux.form.DateTimeField', {
 
         if (value) {
             me.dateField.setValue(value);
-            me.timeField.setValue(Ext.Date.format(value, 'g:i A'));
+
+            me.timeField.setValue(new Date(2008, 0, 1, value.getHours(), value.getMinutes(), value.getSeconds()));
+
+            me.timeField.getStore().clearFilter();
         }
     }
 });

@@ -1,4 +1,4 @@
-module Api
+module API
   module V1
     class BaseController < ActionController::Base
 
@@ -10,9 +10,9 @@ module Api
       protected
 
       def not_authenticated
-        render json: {success: false, message: 'Not Authenticated'}
+        render json: {success: false, message: 'Not Authenticated'}, status: 401
       end
 
     end
   end # V1
-end # Api
+end # API

@@ -1,4 +1,4 @@
-module Api
+module API
   module V1
     class PaymentApplicationsController < BaseController
 
@@ -61,4 +61,4 @@ module Api
 
     end # PaymentApplicationsController
   end # V1
-end # Api
+end # API

@@ -1,4 +1,4 @@
-module Api
+module API
   module V1
     class FinancialTxnsController < BaseController
 
@@ -50,4 +50,4 @@ module Api
 
     end # BizTxnEvents
   end # V1
-end # Api
+end # API

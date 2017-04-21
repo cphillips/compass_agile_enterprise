@@ -342,7 +342,7 @@ Ext.define("Compass.ErpApp.Desktop.Applications.RailsDbAdmin", {
         var centerRegion = self.container;
         var itemId = Compass.ErpApp.Utility.Encryption.MD5(node.data.id);
         var item = centerRegion.getComponent(itemId);
-        var imgSrc = '/download/' + node.data.text + '?path=' + node.data.parentId;
+        var imgSrc = '/download/' + node.data.text + '?path=' + node.data.parentId + '&token=' +  Math.round(Math.random() * 10000000);
         var title = node.data.text + ' (' + node.parentNode.data.reportName + ')';
         if (Compass.ErpApp.Utility.isBlank(item)) {
             item = Ext.create('Ext.panel.Panel', {

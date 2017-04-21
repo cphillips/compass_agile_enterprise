@@ -1,4 +1,4 @@
-module Api
+module API
   module V1
     class OrderLineItemsController < BaseController
 
@@ -67,4 +67,4 @@ module Api
 
     end # OrderLineItemsController
   end # V1
-end # Api
+end # API

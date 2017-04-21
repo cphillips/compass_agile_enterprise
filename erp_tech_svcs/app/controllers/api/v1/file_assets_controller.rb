@@ -1,4 +1,4 @@
-module Api
+module API
   module V1
     class FileAssetsController < BaseController
 
@@ -67,4 +67,4 @@ module Api
 
     end # FileAssetsController
   end # V1
-end # Api
+end # API

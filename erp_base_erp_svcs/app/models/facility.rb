@@ -10,4 +10,14 @@ class Facility < ActiveRecord::Base
 
   belongs_to :postal_address
 
+  def to_data_hash
+    data = to_hash(only: [:id, :description, :created_at, :updated_at])
+
+    if postal_address
+      data[:postal_address] = postal_address.to_data_hash
+    end
+
+    data
+  end
+
 end

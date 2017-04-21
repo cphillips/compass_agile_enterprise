@@ -1,4 +1,4 @@
-Api::V1::PartiesController.class_eval do
+API::V1::PartiesController.class_eval do
 
   def user
     party = Party.find(params[:id])

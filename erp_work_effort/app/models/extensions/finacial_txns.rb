@@ -1,4 +1,4 @@
-module Api
+module API
   module V1
     module Extensions
       module FinancialTxnFilters
@@ -22,6 +22,6 @@ module Api
       end # BizTxnEventFilters
     end # Extensions
   end # V1
-end # Api
+end # API
 
-FinancialTxn.singleton_class.prepend Api::V1::Extensions::FinancialTxnFilters
+FinancialTxn.singleton_class.prepend API::V1::Extensions::FinancialTxnFilters

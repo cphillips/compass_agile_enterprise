@@ -1,4 +1,4 @@
-module Api
+module API
   module V1
     class GeoZonesController < BaseController
 
@@ -22,4 +22,4 @@ module Api
 
     end # GeoZonesController
   end # V1
-end # Api
+end # API

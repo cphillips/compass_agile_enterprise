@@ -1,4 +1,4 @@
-Api::V1::BaseController.class_eval do
+API::V1::BaseController.class_eval do
 
   # check_username is added because the users api controller is loaded before this file is loaded
   before_filter :require_login, except: [:generate_auth_token, :auth_token_valid, :check_username]
@@ -43,4 +43,4 @@ Api::V1::BaseController.class_eval do
 
   end
 
-end # Api
+end # API

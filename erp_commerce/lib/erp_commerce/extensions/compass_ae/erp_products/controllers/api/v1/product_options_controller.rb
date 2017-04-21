@@ -33,4 +33,4 @@ module ErpCommerce
   end # Extensions
 end # CompassAeBusinessSuite
 
-Api::V1::ProductOptionsController.prepend ErpCommerce::Extensions::ProductOptionsControllerExtension
+API::V1::ProductOptionsController.prepend ErpCommerce::Extensions::ProductOptionsControllerExtension

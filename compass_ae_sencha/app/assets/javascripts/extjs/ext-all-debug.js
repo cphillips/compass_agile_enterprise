@@ -106833,7 +106833,7 @@ Ext.define('Ext.util.CSS', function() {
                styleEl.setAttribute("id", id);
             }
 
-            if (Ext.isIE) {
+            if (Ext.isIE && !Ext.isIE11) {
                head.appendChild(styleEl);
                ss = styleEl.styleSheet;
                ss.cssText = cssText;

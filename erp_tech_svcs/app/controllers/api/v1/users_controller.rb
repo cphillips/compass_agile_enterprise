@@ -1,4 +1,4 @@
-module Api
+module API
   module V1
     class UsersController < BaseController
 
@@ -321,4 +321,4 @@ module Api
 
     end # UsersController
   end # V1
-end # Api
+end # API

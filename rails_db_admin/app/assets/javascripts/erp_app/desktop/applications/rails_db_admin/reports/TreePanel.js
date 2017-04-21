@@ -288,22 +288,27 @@ Ext.define("Compass.ErpApp.Desktop.Applications.RailsDbAdmin.Reports.TreePanel",
                     if (record.data.leaf && record.parentNode.data.isReport) {
                         me.editQuery(record.parentNode);
                     } else if (record.data.leaf) {
-                        var msg = Ext.Msg.wait("Loading", "Retrieving contents...");
-                        Ext.Ajax.request({
-                            url: '/rails_db_admin/erp_app/desktop/reports/get_contents',
-                            method: 'POST',
-                            params: {
-                                node: record.data.id
-                            },
-                            success: function(response) {
-                                msg.hide();
-                                me.fireEvent('contentLoaded', me, record, response.responseText);
-                            },
-                            failure: function() {
-                                Ext.Msg.alert('Status', 'Error loading contents');
-                                msg.hide();
-                            }
-                        });
+                        var fileType = record.data.id.split('.').pop();
+                        if (Ext.Array.indexOf(['png', 'gif', 'jpg', 'jpeg', 'ico', 'bmp', 'tif', 'tiff'], fileType.toLowerCase()) > -1) {
+                            this.fireEvent('showImage', this, record);
+                        } else {
+                            var msg = Ext.Msg.wait("Loading", "Retrieving contents...");
+                            Ext.Ajax.request({
+                                url: '/rails_db_admin/erp_app/desktop/reports/get_contents',
+                                method: 'POST',
+                                params: {
+                                    node: record.data.id
+                                },
+                                success: function(response) {
+                                    msg.hide();
+                                    me.fireEvent('contentLoaded', me, record, response.responseText);
+                                },
+                                failure: function() {
+                                    Ext.Msg.alert('Status', 'Error loading contents');
+                                    msg.hide();
+                                }
+                            });
+                        }
                     } else if (record.data.isReport) {
                         me.loadReport(record);
                         Ext.getCmp('reports_accordian_panel').down('railsdbadminreportssettings').expand();

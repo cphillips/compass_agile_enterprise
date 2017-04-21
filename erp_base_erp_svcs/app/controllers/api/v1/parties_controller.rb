@@ -1,4 +1,4 @@
-module Api
+module API
   module V1
     class PartiesController < BaseController
 
@@ -54,6 +54,7 @@ module Api
         unless params[:id].blank?
           parties = parties.where(id: params[:id].split(','))
         end
+        
         unless role_types.blank?
           if params[:include_child_roles].present? and params[:include_child_roles].to_bool
             role_types = RoleType.find_child_role_types(role_types.split(',')).collect{|role_type| role_type.internal_identifier}
@@ -377,4 +378,4 @@ module Api
 
     end # PartiesController
   end # V1
-end # Api
+end # API

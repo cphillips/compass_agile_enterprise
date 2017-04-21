@@ -158,7 +158,9 @@ class OrderLineItem < ActiveRecord::Base
     if product_offer
       product_offer
     else
-      if product_instance
+      if inventory_entry
+        inventory_entry
+      elsif product_instance
         product_instance
       else
         product_type
@@ -189,13 +191,13 @@ class OrderLineItem < ActiveRecord::Base
 
   # Check if this Order Line Item is equal by product type and options selected
   #
-  # @param {Integer} product_type_id Product type Id to check
+  # @param {Integer} product_type Product type
   # @param {Array} options Array of options
   # @return {Boolean} true if it is equal
-  def equals?(product_type_id, options)
+  def equals?(product_type, options)
     equal = true;
 
-    if self.product_type.id == product_type_id
+    if self.product_type.id == product_type.id
       self.selected_product_options.each do |selected_product_option|
         passed_option = options.find{ |option| selected_product_option.product_option_applicability_id == option[:product_option_applicability][:id] }
 

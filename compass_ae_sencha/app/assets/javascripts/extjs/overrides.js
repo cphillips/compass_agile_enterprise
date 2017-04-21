@@ -113,6 +113,47 @@ Ext.define('Compass.ErpApp.Shared.RowEditingOverride', {
 Ext.define('Compass.ErpApp.Shared.RowEditingPluginOverride', {
     override: 'Ext.grid.plugin.RowEditing',
 
+    initEditTriggers: function() {
+        var me = this,
+            view = me.view;
+
+        if (me.triggerEvent == 'cellfocus') {
+            me.mon(view, 'cellfocus', me.onCellFocus, me);
+        } else if (me.triggerEvent == 'rowfocus') {
+            me.mon(view, 'rowfocus', me.onRowFocus, me);
+        } else if (me.triggerEvent == 'celllongpress') {
+            me.mon(view, 'cellmousedown', function() {
+                _arguments = arguments;
+
+                // Set timeout
+                me.pressTimer = window.setTimeout(function() {
+                    me.onCellClick.apply(me, _arguments);
+                }, 1000);
+                return false;
+            }, me);
+
+            me.mon(view, 'cellmouseup', function() {
+                clearTimeout(me.pressTimer);
+            }, me);
+        } else {
+            if (view.getSelectionModel().isCellModel) {
+                view.onCellFocus = Ext.Function.bind(me.beforeViewCellFocus, me);
+            }
+
+            if (me.triggerEvent == 'focusedrowclick') {
+                me.mon(view, 'cellclick', me.onCellClick, me);
+            } else {
+                me.mon(view, me.triggerEvent || ('cell' + (me.clicksToEdit === 1 ? 'click' : 'dblclick')), me.onCellClick, me);
+            }
+        }
+
+        me.initAddRemoveHeaderEvents();
+
+        view.on('render', me.initKeyNavHeaderEvents, me, {
+            single: true
+        });
+    },
+
     startEdit: function(record, columnHeader) {
         var me = this,
             editor = me.getEditor(),
@@ -149,6 +190,30 @@ Ext.define('Compass.ErpApp.Shared.RowEditingPluginOverride', {
         if (me.validateEdit() && this.editing) {
             me.editing = false;
             me.fireEvent('edit', me, me.context);
+        }
+    },
+
+    onCellClick: function(view, cell, colIdx, record, row, rowIdx, e) {
+        var expanderSelector = view.expanderSelector,
+            columnHeader = view.ownerCt.getColumnManager().getHeaderAtIndex(colIdx),
+            editor = columnHeader.getEditor(record);
+
+        if (this.triggerEvent == 'focusedrowclick') {
+            var selection = this.grid.getSelectionModel().getSelection();
+
+            if (selection.length == 1 && selection.first().id == record.id) {
+                var me = this;
+
+                setTimeout(function() {
+                    if (!me.dblclicked && editor && !expanderSelector || !e.getTarget(expanderSelector)) {
+                        me.startEdit(record, columnHeader);
+                    }
+                }, 500);
+            }
+        } else {
+            if (editor && !expanderSelector || !e.getTarget(expanderSelector)) {
+                this.startEdit(record, columnHeader);
+            }
         }
     }
 
@@ -203,3 +268,18 @@ Ext.override(Ext.grid.RowEditor, {
 Ext.JSON.encodeDate = function(o) {
     return '"' + Ext.Date.format(o, 'c') + '"';
 };
+
+// Bug fix for TimeField where getValue was returning the current year causing errors
+Ext.define('Compass.ErpApp.Shared.TimeFieldOverride', {
+    override: 'Ext.form.field.Time',
+
+    getValue: function() {
+        var v = this.rawToValue(this.callParent(arguments));
+
+        if (Ext.isDate(v)) {
+            v = this.getInitDate(v.getHours(), v.getMinutes());
+        }
+
+        return v;
+    }
+});

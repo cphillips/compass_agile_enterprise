@@ -50,7 +50,7 @@ Ext.define("Compass.ErpApp.Desktop.Applications.FileManager", {
                                 itemId: itemId,
                                 closable: true,
                                 layout: 'fit',
-                                html: '<img src="/erp_app/desktop/file_manager/base/download_file/?path=' + record.data.id + '" />'
+                                html: '<img src="/erp_app/desktop/file_manager/base/download_file/?path=' + record.data.id + '&token=' + Math.round(Math.random() * 10000000) + '" />'
                             }));
                             contentCardPanel.getLayout().setActiveItem(0);
                             return false;

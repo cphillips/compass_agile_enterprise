@@ -20,16 +20,7 @@ class StatusApplication < ActiveRecord::Base
 
   belongs_to :party
 
-  def to_data_hash
-    data = to_hash only: [:id,
-                   :created_at,
-                   :updated_at],
-            username: username
-
-    data[:tracked_status_type] = tracked_status_type.to_data_hash
-
-    data
-  end
+  validates :tracked_status_type, presence: true
 
   def username
     user_name = "System"
@@ -40,6 +31,14 @@ class StatusApplication < ActiveRecord::Base
     end
 
     user_name
+  end
+
+  def to_data_hash
+    data = to_hash(only: [:id,:created_at,:updated_at], username: username)
+
+    data[:tracked_status_type] = tracked_status_type.to_data_hash
+
+    data
   end
 
 end

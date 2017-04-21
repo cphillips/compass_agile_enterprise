@@ -82,6 +82,31 @@ module Knitkit
           end
         end
 
+        def replace_file
+          begin
+            contents, message = @file_support.get_contents(params["replace_file_data"].path)
+
+            new_dir = params["node"].split('/').reverse.drop(1).reverse.join('/')
+            new_name = params["replace_file_data"].original_filename
+
+            new_path = File.join(new_dir, new_name)
+
+            file = @assets_model.files.find(:first, :conditions => ['name = ? and directory = ?', ::File.basename(params["node"]), ::File.dirname(params["node"])])
+            
+            file.replace!(params["node"], new_path, contents)
+
+            render :json => {:success => true, name: params["replace_file_data"].original_filename, path: new_path}
+          rescue Exception => ex
+            Rails.logger.error(ex.message)
+            Rails.logger.error(ex.backtrace.join("\n"))
+
+            # email notification
+            ExceptionNotifier.notify_exception(ex) if defined? ExceptionNotifier
+
+            render :json => {:success => false, :error => ex.message}
+          end
+        end
+
         def save_move
           messages = []
           result = {}
@@ -191,7 +216,7 @@ module Knitkit
             end
           end
 
-          # if we're using S3, set file permissions to private or public_read   
+          # if we're using S3, set file permissions to private or public_read
           @file_support.set_permissions(path, (file.is_secured? ? :private : :public_read)) if ErpTechSvcs::Config.file_storage == :s3
 
           render :json => {:success => true, :secured => file.is_secured?, :roles => file.roles.uniq.collect { |item| item.internal_identifier }}

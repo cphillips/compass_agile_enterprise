@@ -1,4 +1,4 @@
-module Api
+module API
   module V1
     class BizTxnPartyRolesController < BaseController
 
@@ -139,4 +139,4 @@ module Api
 
     end # BizTxnPartyRolesController
   end # V1
-end # Api
+end # API

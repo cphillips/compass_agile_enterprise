@@ -21,20 +21,49 @@ module ErpBaseErpSvcs
 
         module SingletonMethods
 
+          # Return record that match the passed Email value
+          # 
+          # @param [Hash] email Email to search by
+          # @param [ContactPurpose] [contact_purpose] Contact Purpose to filter by
+          # @return [Object] Record if found by email address
+          #
           def find_by_email(email, contact_purpose=nil)
             if contact_purpose
               self.joins(:contacts => [:contact_purposes])
-                  .joins("INNER JOIN email_addresses on email_addresses.id = contacts.contact_mechanism_id
+              .joins("INNER JOIN email_addresses on email_addresses.id = contacts.contact_mechanism_id
                 and contacts.contact_mechanism_type = 'EmailAddress'")
-                  .where('contact_mechanism_type = ?', 'EmailAddress')
-                  .where('contact_purposes.internal_identifier = ?', contact_purpose)
-                  .where('email_address = ?', email).readonly(false).first
+              .where('contact_mechanism_type = ?', 'EmailAddress')
+              .where('contact_purposes.internal_identifier = ?', contact_purpose)
+              .where('email_address = ?', email).readonly(false).first
             else
               self.joins(:contacts)
-                  .joins("INNER JOIN email_addresses on email_addresses.id = contacts.contact_mechanism_id
+              .joins("INNER JOIN email_addresses on email_addresses.id = contacts.contact_mechanism_id
                 and contacts.contact_mechanism_type = 'EmailAddress'")
-                  .where('contact_mechanism_type = ?', 'EmailAddress')
-                  .where('email_address = ?', email).readonly(false).first
+              .where('contact_mechanism_type = ?', 'EmailAddress')
+              .where('email_address = ?', email).readonly(false).first
+            end
+          end
+
+          # Return records that match the passed Postal Address values
+          # 
+          # @param [Hash] postal_address_values Hash with values of postal address to search for {address_line_1: '4437 Barbados Loop'}
+          # @param [ContactPurpose] [contact_purpose] Contact Purpose to filter by
+          # @return [Array] Array of records with the passed Postal Address values
+          #
+          def find_by_postal_address(postal_address_values, contact_purpose=nil)
+            if contact_purpose
+              self.joins(:contacts => [:contact_purposes])
+              .joins("INNER JOIN postal_addresses on postal_addresses.id = contacts.contact_mechanism_id
+                and contacts.contact_mechanism_type = 'PostalAddress'")
+              .where('contact_mechanism_type = ?', 'PostalAddress')
+              .where('contact_purposes.internal_identifier = ?', contact_purpose)
+              .where(postal_addresses: postal_address_values).readonly(false).uniq
+            else
+              self.joins(:contacts)
+              .joins("INNER JOIN postal_addresses on postal_addresses.id = contacts.contact_mechanism_id
+                and contacts.contact_mechanism_type = 'PostalAddress'")
+              .where('contact_mechanism_type = ?', 'PostalAddress')
+              .where(postal_addresses: postal_address_values).readonly(false).uniq
             end
           end
 
@@ -232,7 +261,7 @@ module ErpBaseErpSvcs
             table_name = contact_mechanism_class.name.tableize
 
             self.contacts.joins("inner join #{table_name} on #{table_name}.id = contact_mechanism_id and contact_mechanism_type = '#{contact_mechanism_class.name}'")
-                .where('contacts.is_primary = ?', true).readonly(false).first
+            .where('contacts.is_primary = ?', true).readonly(false).first
           end
 
           # find first contact mechanism with purpose

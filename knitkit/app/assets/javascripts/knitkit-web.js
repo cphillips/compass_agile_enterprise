@@ -16,6 +16,7 @@
 //= require ./knitkit/inline_editing
 //= require ./knitkit/jquery.validate.min
 //= require ./knitkit/additional-methods.min
+//= require ./knitkit/bootstrap-tagsinput
 //= require ./knitkit/js.cookie
 //= require ./knitkit/captcha
 //= require moment

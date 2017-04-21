@@ -1,4 +1,4 @@
-module Api
+module API
   module V1
     class CapabilitiesController < BaseController
 
@@ -157,4 +157,4 @@ module Api
 
     end # CapabilitiesController
   end # V1
-end # Api
+end # API

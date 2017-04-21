@@ -338,7 +338,12 @@ Ext.define("Compass.ErpApp.Shared.TypeSelectionTree", {
                                             }, this, true);
                                         }
 
-                                        parentNode.set('leaf', false);
+                                        if (parentNode) {
+                                            parentNode.set('leaf', false);
+                                        } else {
+                                            parentNode = me.getRootNode();
+                                        }
+
                                         parentNode.appendChild({
                                             text: responseObj[me.typesRoot.singularize()].description,
                                             internalIdentifier: responseObj[me.typesRoot.singularize()].internal_identifier,

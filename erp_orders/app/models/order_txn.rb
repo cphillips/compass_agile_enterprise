@@ -157,7 +157,7 @@ class OrderTxn < ActiveRecord::Base
 
   # helper method to get dba_organization related to this order_txn
   def dba_organization
-    find_party_by_role('dba_org')
+    find_party_by_role('order_roles_dba_org')
   end
   alias :tenant :dba_organization
 
@@ -285,6 +285,8 @@ class OrderTxn < ActiveRecord::Base
     end
 
     case class_name
+    when 'InventoryEntry'
+      line_item = add_inventory_entry_line_item(object)
     when 'ProductType'
       line_item = add_product_type_line_item(object, opts[:selected_product_options], opts[:reln_type], opts[:to_role], opts[:from_role])
     when 'ProductInstance'
@@ -430,36 +432,40 @@ class OrderTxn < ActiveRecord::Base
   end
 
   def get_line_item_for_product_type(product_type, options)
-    line_items.detect { |oli| oli.equals?(product_type.id, options) }
+    line_items.detect { |oli| oli.equals?(product_type, options) }
   end
 
   def get_line_item_for_simple_product_offer(simple_product_offer)
     line_items.detect { |oli| oli.product_offer.product_offer_record == simple_product_offer }
   end
 
-  # Get all vendors for this order as there might be multiple depending on the products purchased
+  # Get all parties by thier roles for this order as there might be multiple depending on the products purchased
   #
-  # @return [Array] Array of vendors
-  def vendors
+  # @return [Array] Array of parties
+  def parties_by_role_types(*role_types)
+    role_types = role_types.flatten
+
     valid_order_line_items = order_line_items.select{|order_line_item| order_line_item.line_item_record.is_a? ProductType}
 
-    _vendors = []
+    parties = []
 
     valid_order_line_items.each do |order_line_item|
-      _vendors.push(order_line_item.product_type.find_party_by_role('vendor'))
+      parties.push(order_line_item.product_type.find_parties_by_role(role_types))
     end
 
-    _vendors.compact.uniq
+    parties.flatten.compact.uniq
   end
 
-  # Get line items grouped by vendor
+  # Get line items grouped by a party role such as vendor
   #
-  # @return [Array] Array of vendors
-  def line_items_by_vendor
+  # @return [Array] Array of line items grouped for passed party roles such as vendor
+  def line_items_by_party_roles(*role_types)
+    role_types = role_types.flatten
+
     valid_order_line_items = order_line_items.select{|order_line_item| order_line_item.line_item_record.is_a? ProductType}
 
-     valid_order_line_items.group_by do |order_line_item|
-      order_line_item.product_type.find_party_by_role('vendor')
+    valid_order_line_items.group_by do |order_line_item|
+      order_line_item.product_type.find_party_by_role(role_types)
     end
   end
 

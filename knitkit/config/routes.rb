@@ -17,7 +17,8 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
 
-      resources :websites, defaults: { :format => 'json' }
+      resources :websites, defaults: { format: 'json' }
+      resources :tags, defaults: { format: 'json'}
 
     end
   end

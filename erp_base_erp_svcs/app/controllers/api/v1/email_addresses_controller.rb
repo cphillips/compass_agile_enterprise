@@ -1,4 +1,4 @@
-module Api
+module API
   module V1
     class EmailAddressesController < BaseController
 
@@ -216,4 +216,4 @@ module Api
 
     end # EmailAddressesController
   end # V1
-end # Api
+end # API

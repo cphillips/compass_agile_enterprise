@@ -3,21 +3,21 @@ Ext.define("Compass.ErpApp.Desktop.Applications.Knitkit.FileAssetsPanel", {
     alias: 'widget.knitkit_FileAssetsPanel',
     cls: 'file-assets-panel',
 
-    constructor: function (config) {
+    constructor: function(config) {
         this.websiteId = null;
         var self = this;
         self.module = config.module;
 
-        this.changeSecurityOnFile = function (node, secure, model, websiteId) {
+        this.changeSecurityOnFile = function(node, secure, model, websiteId) {
             var updateUrl = '/knitkit/erp_app/desktop/file_assets/' + model + '/update_security';
             Ext.Ajax.request({
                 url: '/api/v1/security_roles',
                 method: 'GET',
-                params:{
+                params: {
                     parent: 'website_builder',
                     include_admin: true
                 },
-                success: function (response) {
+                success: function(response) {
                     var obj = Ext.decode(response.responseText);
                     if (obj.success) {
                         Ext.create('widget.selectroleswindow', {
@@ -29,33 +29,30 @@ Ext.define("Compass.ErpApp.Desktop.Applications.Knitkit.FileAssetsPanel", {
                             currentRoles: node.get('roles'),
                             availableRoles: obj.availableRoles,
                             listeners: {
-                                success: function (window, response) {
+                                success: function(window, response) {
                                     if (response.success) {
                                         node.set('roles', response.roles);
                                         if (response.secured) {
                                             node.set('iconCls', 'icon-document_lock');
-                                        }
-                                        else {
+                                        } else {
                                             node.set('iconCls', 'icon-document');
                                         }
                                         node.set('isSecured', response.secured);
                                         node.commit();
-                                    }
-                                    else {
+                                    } else {
                                         Ext.Msg.alert('Error', 'Error securing file.');
                                     }
                                 },
-                                failure: function () {
+                                failure: function() {
                                     Ext.Msg.alert('Error', 'Could not update security');
                                 }
                             }
                         }).show();
-                    }
-                    else {
+                    } else {
                         Ext.Msg.alert('Error', 'Could not load available roles');
                     }
                 },
-                failure: function (response) {
+                failure: function(response) {
                     Ext.Msg.alert('Error', 'Could not load available roles');
                 }
             });
@@ -75,87 +72,81 @@ Ext.define("Compass.ErpApp.Desktop.Applications.Knitkit.FileAssetsPanel", {
             standardUploadUrl: '/knitkit/erp_app/desktop/file_assets/shared/upload_file',
             url: '/knitkit/erp_app/desktop/file_assets/shared/expand_directory',
             containerScroll: true,
-            additionalContextMenuItems: [
-                {
-                    nodeType: 'leaf',
-                    text: 'Insert link at cursor',
-                    iconCls: 'icon-add',
-                    listeners: {
-                        scope: self,
-                        'click': function () {
-                            var node = this.sharedFileAssetsTreePanel.selectedNode;
-                            Ext.MessageBox.prompt('Display Name', 'Please enter display name:', function (btn, text) {
-                                if (btn == 'ok') {
-                                    self.module.centerRegion.insertHtmlIntoActiveCkEditorOrCodemirror('<a href="/download/' + node.data.text + '?path=' + node.data.downloadPath + '">' + text + '</a>');
-                                }
-                            });
-                        }
-                    }
-                },
-                {
-                    nodeType: 'leaf',
-                    text: 'Insert link at cursor (inline)',
-                    iconCls: 'icon-add',
-                    listeners: {
-                        scope: self,
-                        'click': function () {
-                            var node = this.sharedFileAssetsTreePanel.selectedNode;
-                            Ext.MessageBox.prompt('Display Name', 'Please enter display name:', function (btn, text) {
-                                if (btn == 'ok') {
-                                    self.module.centerRegion.insertHtmlIntoActiveCkEditorOrCodemirror('<a href="/download/' + node.data.text + '?path=' + node.data.downloadPath + '&disposition=inline">' + text + '</a>');
-                                }
-                            });
-                        }
-                    }
-                },
-                {
-                    nodeType: 'leaf',
-                    text: 'Insert link at cursor (prompt)',
-                    iconCls: 'icon-add',
-                    listeners: {
-                        scope: self,
-                        'click': function () {
-                            var node = this.sharedFileAssetsTreePanel.selectedNode;
-                            Ext.MessageBox.prompt('Display Name', 'Please enter display name:', function (btn, text) {
-                                if (btn == 'ok') {
-                                    self.module.centerRegion.insertHtmlIntoActiveCkEditorOrCodemirror('<a href="/download/' + node.data.text + '?path=' + node.data.downloadPath + '&disposition=attachment">' + text + '</a>');
-                                }
-                            });
-                        }
-                    }
-                },
-                {
-                    nodeType: 'leaf',
-                    text: 'Security',
-                    iconCls: 'icon-document_lock',
-                    listeners: {
-                        scope: self,
-                        'click': function () {
-                            var node = this.sharedFileAssetsTreePanel.selectedNode;
-                            self.changeSecurityOnFile(node, !node.get('isSecured'), 'shared');
-                        }
+            additionalContextMenuItems: [{
+                nodeType: 'leaf',
+                text: 'Insert link at cursor',
+                iconCls: 'icon-add',
+                listeners: {
+                    scope: self,
+                    'click': function() {
+                        var node = this.sharedFileAssetsTreePanel.selectedNode;
+                        Ext.MessageBox.prompt('Display Name', 'Please enter display name:', function(btn, text) {
+                            if (btn == 'ok') {
+                                self.module.centerRegion.insertHtmlIntoActiveCkEditorOrCodemirror('<a href="/download/' + node.data.text + '?path=' + node.data.downloadPath + '">' + text + '</a>');
+                            }
+                        });
                     }
                 }
-            ],
+            }, {
+                nodeType: 'leaf',
+                text: 'Insert link at cursor (inline)',
+                iconCls: 'icon-add',
+                listeners: {
+                    scope: self,
+                    'click': function() {
+                        var node = this.sharedFileAssetsTreePanel.selectedNode;
+                        Ext.MessageBox.prompt('Display Name', 'Please enter display name:', function(btn, text) {
+                            if (btn == 'ok') {
+                                self.module.centerRegion.insertHtmlIntoActiveCkEditorOrCodemirror('<a href="/download/' + node.data.text + '?path=' + node.data.downloadPath + '&disposition=inline">' + text + '</a>');
+                            }
+                        });
+                    }
+                }
+            }, {
+                nodeType: 'leaf',
+                text: 'Insert link at cursor (prompt)',
+                iconCls: 'icon-add',
+                listeners: {
+                    scope: self,
+                    'click': function() {
+                        var node = this.sharedFileAssetsTreePanel.selectedNode;
+                        Ext.MessageBox.prompt('Display Name', 'Please enter display name:', function(btn, text) {
+                            if (btn == 'ok') {
+                                self.module.centerRegion.insertHtmlIntoActiveCkEditorOrCodemirror('<a href="/download/' + node.data.text + '?path=' + node.data.downloadPath + '&disposition=attachment">' + text + '</a>');
+                            }
+                        });
+                    }
+                }
+            }, {
+                nodeType: 'leaf',
+                text: 'Security',
+                iconCls: 'icon-document_lock',
+                listeners: {
+                    scope: self,
+                    'click': function() {
+                        var node = this.sharedFileAssetsTreePanel.selectedNode;
+                        self.changeSecurityOnFile(node, !node.get('isSecured'), 'shared');
+                    }
+                }
+            }],
             listeners: {
-                'allowdelete': function () {
+                'allowdelete': function() {
                     return currentUser.hasCapability('delete', 'GlobalFileAsset');
                 },
-                'allowupload': function () {
+                'allowupload': function() {
                     return currentUser.hasCapability('upload', 'GlobalFileAsset');
                 },
-                'itemclick': function (view, record, item, index, e) {
+                'itemclick': function(view, record, item, index, e) {
                     e.stopEvent();
                     return false;
                 },
-                'filedeleted': function (fileTreePanel, node) {
-                },
-                'fileuploaded': function (fileTreePanel, node) {
-                },
-                'downloadfile': function (fileTreePanel, node) {
+                'filedeleted': function(fileTreePanel, node) {},
+                'fileuploaded': function(fileTreePanel, node) {},
+                'downloadfile': function(fileTreePanel, node) {
                     window.open("/download/" + node.data.text + "?path=" + node.data.downloadPath + '&disposition=attachment', 'mywindow', 'width=400,height=200');
                     return false;
-                }
+                },
+                'filereplaced': function(fileTreePanel, node) {}
             }
         });
 
@@ -175,96 +166,89 @@ Ext.define("Compass.ErpApp.Desktop.Applications.Knitkit.FileAssetsPanel", {
             standardUploadUrl: '/knitkit/erp_app/desktop/file_assets/website/upload_file',
             url: '/knitkit/erp_app/desktop/file_assets/website/expand_directory',
             containerScroll: true,
-            additionalContextMenuItems: [
-                {
-                    nodeType: 'leaf',
-                    text: 'Insert link at cursor',
-                    iconCls: 'icon-add',
-                    listeners: {
-                        scope: self,
-                        'click': function () {
-                            var node = this.websiteFileAssetsTreePanel.selectedNode;
-                            Ext.MessageBox.prompt('Display Name', 'Please enter display name:', function (btn, text) {
-                                if (btn == 'ok') {
-                                    self.module.centerRegion.insertHtmlIntoActiveCkEditorOrCodemirror('<a href="/download/' + node.data.text + '?path=' + node.data.downloadPath + '">' + text + '</a>');
-                                }
-                            });
-                        }
-                    }
-                },
-                {
-                    nodeType: 'leaf',
-                    text: 'Insert link at cursor (inline)',
-                    iconCls: 'icon-add',
-                    listeners: {
-                        scope: self,
-                        'click': function () {
-                            var node = this.websiteFileAssetsTreePanel.selectedNode;
-                            Ext.MessageBox.prompt('Display Name', 'Please enter display name:', function (btn, text) {
-                                if (btn == 'ok') {
-                                    self.module.centerRegion.insertHtmlIntoActiveCkEditorOrCodemirror('<a href="/download/' + node.data.text + '?path=' + node.data.downloadPath + '&disposition=inline">' + text + '</a>');
-                                }
-                            });
-                        }
-                    }
-                },
-                {
-                    nodeType: 'leaf',
-                    text: 'Insert link at cursor (prompt)',
-                    iconCls: 'icon-add',
-                    listeners: {
-                        scope: self,
-                        'click': function () {
-                            var node = this.websiteFileAssetsTreePanel.selectedNode;
-                            Ext.MessageBox.prompt('Display Name', 'Please enter display name:', function (btn, text) {
-                                if (btn == 'ok') {
-                                    self.module.centerRegion.insertHtmlIntoActiveCkEditorOrCodemirror('<a href="/download/' + node.data.text + '?path=' + node.data.downloadPath + '&disposition=attachment">' + text + '</a>');
-                                }
-                            });
-                        }
-                    }
-                },
-                {
-                    nodeType: 'leaf',
-                    text: 'Security',
-                    iconCls: 'icon-document_lock',
-                    listeners: {
-                        scope: self,
-                        'click': function () {
-                            var node = this.websiteFileAssetsTreePanel.selectedNode;
-                            self.changeSecurityOnFile(node, !node.get('isSecured'), 'website', this.websiteId);
-                        }
+            additionalContextMenuItems: [{
+                nodeType: 'leaf',
+                text: 'Insert link at cursor',
+                iconCls: 'icon-add',
+                listeners: {
+                    scope: self,
+                    'click': function() {
+                        var node = this.websiteFileAssetsTreePanel.selectedNode;
+                        Ext.MessageBox.prompt('Display Name', 'Please enter display name:', function(btn, text) {
+                            if (btn == 'ok') {
+                                self.module.centerRegion.insertHtmlIntoActiveCkEditorOrCodemirror('<a href="/download/' + node.data.text + '?path=' + node.data.downloadPath + '">' + text + '</a>');
+                            }
+                        });
                     }
                 }
-            ],
+            }, {
+                nodeType: 'leaf',
+                text: 'Insert link at cursor (inline)',
+                iconCls: 'icon-add',
+                listeners: {
+                    scope: self,
+                    'click': function() {
+                        var node = this.websiteFileAssetsTreePanel.selectedNode;
+                        Ext.MessageBox.prompt('Display Name', 'Please enter display name:', function(btn, text) {
+                            if (btn == 'ok') {
+                                self.module.centerRegion.insertHtmlIntoActiveCkEditorOrCodemirror('<a href="/download/' + node.data.text + '?path=' + node.data.downloadPath + '&disposition=inline">' + text + '</a>');
+                            }
+                        });
+                    }
+                }
+            }, {
+                nodeType: 'leaf',
+                text: 'Insert link at cursor (prompt)',
+                iconCls: 'icon-add',
+                listeners: {
+                    scope: self,
+                    'click': function() {
+                        var node = this.websiteFileAssetsTreePanel.selectedNode;
+                        Ext.MessageBox.prompt('Display Name', 'Please enter display name:', function(btn, text) {
+                            if (btn == 'ok') {
+                                self.module.centerRegion.insertHtmlIntoActiveCkEditorOrCodemirror('<a href="/download/' + node.data.text + '?path=' + node.data.downloadPath + '&disposition=attachment">' + text + '</a>');
+                            }
+                        });
+                    }
+                }
+            }, {
+                nodeType: 'leaf',
+                text: 'Security',
+                iconCls: 'icon-document_lock',
+                listeners: {
+                    scope: self,
+                    'click': function() {
+                        var node = this.websiteFileAssetsTreePanel.selectedNode;
+                        self.changeSecurityOnFile(node, !node.get('isSecured'), 'website', this.websiteId);
+                    }
+                }
+            }],
             listeners: {
                 scope: self,
-                'load': function (store, node, records) {
+                'load': function(store, node, records) {
                     store.getRootNode().data.text = self.websiteName;
                     self.websiteFileAssetsTreePanel.view.refresh();
                 },
-                'itemclick': function (view, record, item, index, e) {
+                'itemclick': function(view, record, item, index, e) {
                     e.stopEvent();
                     return false;
                 },
-                'filedeleted': function (fileTreePanel, node) {
-                },
-                'fileuploaded': function (fileTreePanel, node) {
-                },
-                'downloadfile': function (fileTreePanel, node) {
+                'filedeleted': function(fileTreePanel, node) {},
+                'fileuploaded': function(fileTreePanel, node) {},
+                'downloadfile': function(fileTreePanel, node) {
                     window.open("/download/" + node.data.text + "?path=" + node.data.downloadPath + '&disposition=attachment', 'mywindow', 'width=400,height=200');
                     return false;
                 }
             }
         });
 
-        this.selectWebsite = function (website) {
+        this.selectWebsite = function(website) {
             this.websiteId = website.id;
             this.websiteName = website.name;
             this.reloadWebsiteFileAssetsTreePanel(website.id);
         };
 
-        this.clearWebsite = function () {
+        this.clearWebsite = function() {
             this.websiteId = null;
             this.websiteName = null;
 
@@ -282,7 +266,7 @@ Ext.define("Compass.ErpApp.Desktop.Applications.Knitkit.FileAssetsPanel", {
             this.websiteFileAssetsTreePanel.getRootNode().removeAll(true);
         };
 
-        this.reloadWebsiteFileAssetsTreePanel = function (websiteId) {
+        this.reloadWebsiteFileAssetsTreePanel = function(websiteId) {
             this.websiteFileAssetsTreePanel.extraPostData = {
                 website_id: websiteId
             };

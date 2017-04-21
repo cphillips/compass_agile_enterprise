@@ -1,4 +1,4 @@
-module Api
+module API
   module V1
     class PhoneNumbersController < BaseController
 
@@ -216,4 +216,4 @@ module Api
 
     end # PhoneNumbersController
   end # V1
-end # Api
+end # API

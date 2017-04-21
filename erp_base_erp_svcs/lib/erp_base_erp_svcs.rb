@@ -1,4 +1,5 @@
 require 'wisper'
+require 'awesome_nested_set'
 require "erp_base_erp_svcs/version"
 require "erp_base_erp_svcs/extensions"
 require "erp_base_erp_svcs/ar_fixtures"

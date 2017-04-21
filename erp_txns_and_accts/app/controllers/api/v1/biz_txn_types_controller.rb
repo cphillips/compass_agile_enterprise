@@ -1,4 +1,4 @@
-module Api
+module API
   module V1
     class BizTxnTypesController < BaseController
 
@@ -128,4 +128,4 @@ module Api
 
     end # BizTxnTypesController
   end # V1
-end # Api
+end # API

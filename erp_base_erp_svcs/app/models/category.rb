@@ -1,6 +1,7 @@
 # unless table_exists?(:categories)
 #   create_table :categories do |t|
 #     t.string :description
+#     t.text :long_description
 #     t.string :external_identifier
 #     t.datetime :from_date
 #     t.datetime :to_date
@@ -20,6 +21,7 @@
 #
 #     t.timestamps
 #   end
+#
 #   add_index :categories, [:category_record_id, :category_record_type], :name => "category_polymorphic"
 #   add_index :categories, :internal_identifier, :name => 'categories_internal_identifier_idx'
 #   add_index :categories, :parent_id, :name => 'categories_parent_id_idx'
@@ -62,6 +64,10 @@ class Category < ActiveRecord::Base
         else
           statement = statement.where(categories: {parent_id: Category.iid(filters[:parent])})
         end
+      end
+
+      if filters[:parent_id]
+        statement = statement.where(categories: {parent_id: filters[:parent_id]})
       end
 
       # filter by query which will filter on description
@@ -113,6 +119,7 @@ class Category < ActiveRecord::Base
       only: [
         :id,
         :description,
+        :long_description,
         :internal_identifier,
         :created_at,
         :updated_at

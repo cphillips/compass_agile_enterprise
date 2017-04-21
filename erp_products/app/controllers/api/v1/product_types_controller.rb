@@ -1,4 +1,4 @@
-module Api
+module API
   module V1
     class ProductTypesController < BaseController
 
@@ -19,6 +19,10 @@ module Api
         query_filter = params[:query_filter].blank? ? {} : Hash.symbolize_keys(JSON.parse(params[:query_filter]))
         context = params[:context].blank? ? {} : Hash.symbolize_keys(JSON.parse(params[:context]))
 
+        if params[:query]
+          query_filter[:keyword] = params[:query].strip
+        end
+
         # hook method to apply any scopes passed via parameters to this api
         product_types = ProductType.apply_filters(query_filter)
 
@@ -38,6 +42,8 @@ module Api
         if start and limit
           product_types = product_types.offset(start).limit(limit)
         end
+
+        product_types = product_types.order('description')
 
         if context[:view]
           if context[:view] == 'mobile'
@@ -146,4 +152,4 @@ module Api
 
     end # ProductTypesController
   end # V1
-end # Api
+end # API

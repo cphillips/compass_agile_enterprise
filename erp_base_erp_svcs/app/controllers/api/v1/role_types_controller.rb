@@ -1,4 +1,4 @@
-module Api
+module API
   module V1
     class RoleTypesController < BaseController
 
@@ -143,4 +143,4 @@ module Api
 
     end # RoleTypesController
   end # V1
-end # Api
+end # API

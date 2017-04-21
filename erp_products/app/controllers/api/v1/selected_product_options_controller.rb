@@ -1,4 +1,4 @@
-module Api
+module API
   module V1
     class SelectedProductOptionsController < BaseController
 
@@ -58,4 +58,4 @@ module Api
 
     end # SelectedProductOptionsController
   end # V1
-end # Api
+end # API

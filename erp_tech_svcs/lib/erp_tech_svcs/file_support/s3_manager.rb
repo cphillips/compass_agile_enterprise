@@ -12,13 +12,13 @@ module ErpTechSvcs
 
           # S3 debug logging
           AWS.config(
-              :logger => Rails.logger,
-              :log_level => :info
+            :logger => Rails.logger,
+            :log_level => :info
           )
 
           @@s3_connection = AWS::S3.new(
-              :access_key_id => @@configuration['access_key_id'],
-              :secret_access_key => @@configuration['secret_access_key']
+            :access_key_id => @@configuration['access_key_id'],
+            :secret_access_key => @@configuration['secret_access_key']
           )
 
           @@s3_bucket = @@s3_connection.buckets[@@configuration['bucket'].to_sym]
@@ -40,6 +40,14 @@ module ErpTechSvcs
 
       def root
         ''
+      end
+
+      def replace_file(old_path, new_path, contents)
+        create_name = File.basename(new_path);
+        create_path = new_path.split('/').reverse.drop(1).reverse.join('/')
+
+        create_file(create_path, create_name, contents)
+        delete_file(old_path)
       end
 
       def update_file(path, content)
@@ -175,11 +183,11 @@ module ErpTechSvcs
 
       def find_node(path, options={})
         parent = {
-            :text => path.split('/').pop,
-            :iconCls => "icon-content",
-            :leaf => false,
-            :id => path,
-            :children => []
+          :text => path.split('/').pop,
+          :iconCls => "icon-content",
+          :leaf => false,
+          :id => path,
+          :children => []
         }
 
         #remove proceeding slash for s3
@@ -194,11 +202,11 @@ module ErpTechSvcs
               next if node.key == path + '/'
 
               leaf_hash = {
-                  :text => node.key.split('/').pop,
-                  :downloadPath => "/#{node.key.split('/')[0..-2].join('/')}",
-                  :id => "/#{node.key}",
-                  :iconCls => 'icon-document',
-                  :leaf => true
+                :text => node.key.split('/').pop,
+                :downloadPath => "/#{node.key.split('/')[0..-2].join('/')}",
+                :id => "/#{node.key}",
+                :iconCls => 'icon-document',
+                :leaf => true
               }
 
               if options[:file_asset_holder]
@@ -208,10 +216,10 @@ module ErpTechSvcs
               parent[:children] << leaf_hash
             else
               parent[:children] << {
-                  :iconCls => "icon-content",
-                  :text => node.prefix.split('/').pop,
-                  :id => "/#{node.prefix}".chop,
-                  :leaf => false
+                :iconCls => "icon-content",
+                :text => node.prefix.split('/').pop,
+                :id => "/#{node.prefix}".chop,
+                :leaf => false
               }
             end
           end

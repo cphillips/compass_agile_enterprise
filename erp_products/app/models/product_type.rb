@@ -94,6 +94,23 @@ class ProductType < ActiveRecord::Base
         end
       end
 
+      if filters and filters[:keyword]
+        product_types_tbl = self.arel_table
+        descriptive_assets_tbl = DescriptiveAsset.arel_table
+
+        join_stmt = "LEFT OUTER JOIN descriptive_assets ON descriptive_assets.described_record_id = product_types.id AND descriptive_assets.described_record_type = 'ProductType' AND #{descriptive_assets_tbl[:description].matches('%' + filters[:keyword] + '%').to_sql}"
+
+        statement = statement.joins(join_stmt).where(product_types_tbl[:description].matches('%' + filters[:keyword] + '%'))
+      end
+
+      if filters[:available_on_web]
+        statement = statement.where(available_on_web: true)
+      end
+
+      if filters[:not_available_on_web]
+        statement = statement.where(available_on_web: false)
+      end
+
       statement
     end
 

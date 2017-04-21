@@ -1,4 +1,4 @@
-module Api
+module API
   module V1
     class TimeEntriesController < BaseController
 
@@ -477,4 +477,4 @@ module Api
 
     end # TimeEntriesController
   end # V1
-end # Api
+end # API

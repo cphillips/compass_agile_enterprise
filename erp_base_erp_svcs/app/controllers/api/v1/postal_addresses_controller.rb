@@ -1,4 +1,4 @@
-module Api
+module API
   module V1
     class PostalAddressesController < BaseController
 
@@ -252,4 +252,4 @@ module Api
 
     end # PostalAddressesController
   end # V1
-end # Api
+end # API

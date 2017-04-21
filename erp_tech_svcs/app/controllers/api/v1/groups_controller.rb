@@ -1,4 +1,4 @@
-module Api
+module API
   module V1
     class GroupsController < BaseController
 
@@ -233,4 +233,4 @@ module Api
 
     end # GroupsController
   end # V1
-end # Api
+end # API

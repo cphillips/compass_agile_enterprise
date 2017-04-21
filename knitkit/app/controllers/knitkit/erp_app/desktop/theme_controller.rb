@@ -63,12 +63,12 @@ module Knitkit
               theme.name = params[:name].strip
               if theme.save
                 render :json => {
-                         success: true,
-                         theme: {
-                           name: theme.name,
-                           text: "#{theme.name}[#{theme.theme_id}]"
-                         }
-                       }
+                  success: true,
+                  theme: {
+                    name: theme.name,
+                    text: "#{theme.name}[#{theme.theme_id}]"
+                  }
+                }
               else
                 render :json => {success: false}
               end
@@ -131,6 +131,31 @@ module Knitkit
             end
           rescue ErpTechSvcs::Utils::CompassAccessNegotiator::Errors::UserDoesNotHaveCapability => ex
             render :json => {:success => false, :message => ex.message}
+          end
+        end
+
+        def replace_file
+          begin
+            contents, message = @file_support.get_contents(params["replace_file_data"].path)
+
+            new_dir = params[:node].split('/').reverse.drop(1).reverse.join('/')
+            new_name = params["replace_file_data"].original_filename
+
+            new_path = File.join(new_dir, new_name)
+
+            theme_file = get_theme_file(params[:node])
+            
+            theme_file.replace!(params[:node], new_path, contents)
+
+            render :json => {:success => true, name: params["replace_file_data"].original_filename, path: new_path, url: theme_file.data.url}
+          rescue Exception => ex
+            Rails.logger.error(ex.message)
+            Rails.logger.error(ex.backtrace.join("\n"))
+
+            # email notification
+            ExceptionNotifier.notify_exception(ex) if defined? ExceptionNotifier
+
+            render :json => {:success => false, :error => ex.message}
           end
         end
 

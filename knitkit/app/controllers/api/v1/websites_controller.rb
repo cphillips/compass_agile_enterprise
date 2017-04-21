@@ -1,4 +1,4 @@
-module Api
+module API
   module V1
     class WebsitesController < BaseController
 
@@ -11,4 +11,4 @@ module Api
 
     end # WebsitesController
   end # V1
-end # Api
+end # API

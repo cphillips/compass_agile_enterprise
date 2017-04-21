@@ -1,4 +1,4 @@
-module Api
+module API
   module V1
     class StatusApplicationsController < BaseController
 
@@ -37,4 +37,4 @@ module Api
 
     end # StatusApplicationsController
   end # V1
-end # Api
+end # API

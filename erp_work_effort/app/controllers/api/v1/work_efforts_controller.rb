@@ -1,4 +1,4 @@
-module Api
+module API
   module V1
     class WorkEffortsController < BaseController
 
@@ -38,15 +38,17 @@ module Api
 
         work_efforts = WorkEffort.where("work_efforts.parent_id is null")
 
-        # scope by user if that option is passed and no parties are passed to filter by
-        if query_filter[:parties].blank? and params[:scope_by_user].present? and params[:scope_by_user].to_bool
-          work_efforts = work_efforts.scope_by_user(current_user, {role_types: [RoleType.iid('work_resource')]})
+        if query_filter[:project_id].blank?
+          # scope by user if that option is passed and no parties are passed to filter by
+          if params[:scope_by_user].present? and params[:scope_by_user].to_bool
+            work_efforts = work_efforts.scope_by_user(current_user, {role_types: [RoleType.iid('work_resource')]})
 
-          # scope by dba organization if we are not scoping by user or filtering by parties
-        elsif query_filter[:parties].blank?
-          dba_organizations = [current_user.party.dba_organization]
-          dba_organizations = dba_organizations.concat(current_user.party.dba_organization.child_dba_organizations)
-          work_efforts = work_efforts.scope_by_dba_organization(dba_organizations)
+            # scope by dba organization if we are not scoping by user or filtering by parties and there is no project_id
+          else
+            dba_organizations = [current_user.party.dba_organization]
+            dba_organizations = dba_organizations.concat(current_user.party.dba_organization.child_dba_organizations)
+            work_efforts = work_efforts.scope_by_dba_organization(dba_organizations)
+          end
         end
 
         # apply filters
@@ -486,4 +488,4 @@ module Api
 
     end # WorkEffortsController
   end # V1
-end # Api
+end # API

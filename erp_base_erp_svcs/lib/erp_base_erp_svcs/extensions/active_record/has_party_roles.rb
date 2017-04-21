@@ -23,7 +23,7 @@ module ErpBaseErpSvcs
           # an array of RoleType records or an array of RoleType ids
           def with_party_role_types(role_types)
             joins(:entity_party_roles)
-                .where(entity_party_roles: {role_type_id: role_types})
+            .where(entity_party_roles: {role_type_id: role_types})
           end
 
           # Scope by a set of parties with the passed role_types
@@ -34,7 +34,7 @@ module ErpBaseErpSvcs
           # an array of RoleType records or an array of RoleType ids
           def with_party_role(parties, role_types)
             joins(:entity_party_roles).where(entity_party_roles: {role_type_id: role_types})
-                .where(entity_party_roles: {party_id: parties})
+            .where(entity_party_roles: {party_id: parties})
           end
         end
 
@@ -65,20 +65,24 @@ module ErpBaseErpSvcs
             end
           end
 
-          def find_parties_by_role(role_type)
-            if role_type.is_a?(String)
-              role_type = RoleType.iid(role_type)
+          def find_parties_by_role(role_types)
+            unless role_types.is_a? Array
+              role_types = [role_types]
             end
 
-            entity_party_roles.where(role_type_id: role_type.id).collect(&:party)
+            role_types = RoleType.find_child_role_types(role_types)
+
+            entity_party_roles.where(role_type_id: role_types).collect(&:party)
           end
 
-          def find_party_by_role(role_type)
-            if role_type.is_a?(String)
-              role_type = RoleType.iid(role_type)
+          def find_party_by_role(role_types)
+            unless role_types.is_a? Array
+              role_types = [role_types]
             end
 
-            entity_party_role = entity_party_roles.where(role_type_id: role_type.id).first
+            role_types = RoleType.find_child_role_types(role_types)
+
+            entity_party_role = entity_party_roles.where(role_type_id: role_types).first
 
             if entity_party_role
               entity_party_role.party

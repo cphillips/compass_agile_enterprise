@@ -1,4 +1,4 @@
-module Api
+module API
   module V1
     class TrackedStatusTypesController < BaseController
 
@@ -168,4 +168,4 @@ module Api
 
     end # TrackedStatusTypesController
   end # V1
-end # Api
+end # API

@@ -1,4 +1,4 @@
-module Api
+module API
   module V1
     class BankAccountsController < BaseController
 
@@ -88,4 +88,4 @@ module Api
 
     end # BankAccountsController
   end # V1
-end # Api
+end # API

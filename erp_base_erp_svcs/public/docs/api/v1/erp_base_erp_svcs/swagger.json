@@ -1,0 +1,1043 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "CompassAE API Documentation",
+        "version": "1.0.0",
+        "description": "CompassAE API Documentation"
+    },
+    "paths": {
+        "/api/v1/email_addresses": {
+            "post": {
+                "tags": ["Email_Address"],
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "parameters": [{
+                    "in": "body",
+                    "name": "body",
+                    "required": true,
+                    "schema": {
+                        "$ref": "#/definitions/CreateEmailAddress"
+                    }
+                }],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "type": "Boolean",
+                            "items": {
+                                "$ref": "#/definitions/CreateEmailAddress"
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "tags": ["Email_Address"],
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "parameters": [{
+                    "name": "contact_purposes",
+                    "in": "path",
+                    "required": false,
+                    "type": "string",
+                    "description": "Comma delimitted string of ContactPurpose internal identifiers to filter by "
+                }],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "type": "Boolean",
+                            "items": {
+                                "$ref": "#/definitions/GetEmailAddresses"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/email_addresses/{id}": {
+            "delete": {
+                "tags": ["Email_Address"],
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "type": "Boolean",
+                            "items": {
+                                "$ref": "#/definitions/DeleteEmailAddress"
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "tags": ["Email_Address"],
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "type": "Boolean",
+                            "items": {
+                                "$ref": "#/definitions/GetEmailAddresses"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": ["Email_Address"],
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "parameters": [{
+                    "in": "body",
+                    "name": "body",
+                    "required": true,
+                    "schema": {
+                        "$ref": "#/definitions/UpdateEmailAddress"
+                    }
+                }],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "type": "Boolean",
+                            "items": {
+                                "$ref": "#/definitions/UpdateEmailAddress"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/facilities": {
+            "get": {
+                "tags": ["Facility"],
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "type": "Boolean",
+                            "items": {
+                                "$ref": "#/definitions/GetFacilities"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/parties": {
+            "post": {
+                "tags": ["Party"],
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "parameters": [{
+                    "in": "body",
+                    "name": "body",
+                    "required": true,
+                    "schema": {
+                        "$ref": "#/definitions/CreateParty"
+                    }
+                }],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "type": "Boolean",
+                            "items": {
+                                "$ref": "#/definitions/CreateParty"
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "tags": ["Party"],
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "parameters": [{
+                    "name": "role_types",
+                    "in": "path",
+                    "required": false,
+                    "type": "string",
+                    "description": "Comma delimitted string of RoleTypes to filter by "
+                }, {
+                    "name": "id",
+                    "in": "path",
+                    "required": false,
+                    "type": "integer",
+                    "description": "Id of a particular party to filter by "
+                }, {
+                    "name": "include_child_roles",
+                    "in": "path",
+                    "required": false,
+                    "type": "boolean",
+                    "description": "True to include child RoleTypes when filtering by RoleTypes "
+                }, {
+                    "name": "include_descendants",
+                    "in": "path",
+                    "required": false,
+                    "type": "boolean",
+                    "description": "True to include parties that are related to a parent DBA Organization in the result set "
+                }],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "type": "Boolean",
+                            "items": {
+                                "$ref": "#/definitions/GetParties"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/parties/{id}": {
+            "put": {
+                "tags": ["Party"],
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "parameters": [{
+                    "in": "body",
+                    "name": "body",
+                    "required": true,
+                    "schema": {
+                        "$ref": "#/definitions/CreateParty"
+                    }
+                }],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "type": "Boolean",
+                            "items": {
+                                "$ref": "#/definitions/CreateParty"
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": ["Party"],
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "type": "Boolean",
+                            "items": {
+                                "$ref": "#/definitions/DeleteParty"
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "tags": ["Party"],
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "type": "Boolean",
+                            "items": {
+                                "$ref": "#/definitions/GetParty"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/parties/{id}/update_roles": {
+            "put": {
+                "tags": ["Party"],
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "parameters": [{
+                    "in": "body",
+                    "name": "body",
+                    "required": true,
+                    "schema": {
+                        "$ref": "#/definitions/UpdatePartyRoles"
+                    }
+                }],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "type": "Boolean",
+                            "items": {
+                                "$ref": "#/definitions/UpdatePartyRoles"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/phone_numbers": {
+            "post": {
+                "tags": ["PhoneNumber"],
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "parameters": [{
+                    "in": "body",
+                    "name": "body",
+                    "required": true,
+                    "schema": {
+                        "$ref": "#/definitions/CreatePhoneNumber"
+                    }
+                }],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "type": "Boolean",
+                            "items": {
+                                "$ref": "#/definitions/CreatePhoneNumber"
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "tags": ["Phone_Number"],
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "parameters": [{
+                    "name": "contact_purposes",
+                    "in": "path",
+                    "required": false,
+                    "type": "string",
+                    "description": "Comma delimitted string of ContactPurpose internal identifiers to filter by "
+                }],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "type": "Boolean",
+                            "items": {
+                                "$ref": "#/definitions/GetPhoneNumbers"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/phone_numbers/{id}": {
+            "delete": {
+                "tags": ["Phone_Number"],
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "type": "Boolean",
+                            "items": {
+                                "$ref": "#/definitions/DeletePhoneNumber"
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "tags": ["Phone_Number"],
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "type": "Boolean",
+                            "items": {
+                                "$ref": "#/definitions/GetPhoneNumbers"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": ["Phone_Number"],
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "parameters": [{
+                    "in": "body",
+                    "name": "body",
+                    "required": true,
+                    "schema": {
+                        "$ref": "#/definitions/UpdatePhoneNumber"
+                    }
+                }],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "type": "Boolean",
+                            "items": {
+                                "$ref": "#/definitions/UpdatePhoneNumber"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/postal_addresses": {
+            "post": {
+                "tags": ["Postal_Address"],
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "parameters": [{
+                    "in": "body",
+                    "name": "body",
+                    "required": true,
+                    "schema": {
+                        "$ref": "#/definitions/CreatePostalAddress"
+                    }
+                }],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "type": "Boolean",
+                            "items": {
+                                "$ref": "#/definitions/CreatePostalAddress"
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "tags": ["Postal_Address"],
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "parameters": [{
+                    "name": "contact_purposes",
+                    "in": "path",
+                    "required": false,
+                    "type": "string",
+                    "description": "Comma delimited string of ContactPurpose internal identifiers to filter by "
+                }, {
+                    "name": "query",
+                    "in": "path",
+                    "required": false,
+                    "type": "string",
+                    "description": "Query to search description by "
+                }],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "type": "Boolean",
+                            "items": {
+                                "$ref": "#/definitions/GetPostalAddresses"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/postal_addresses/{id}": {
+            "delete": {
+                "tags": ["Postal_Address"],
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "type": "Boolean",
+                            "items": {
+                                "$ref": "#/definitions/DeletePostalAddress"
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "tags": ["Postal_Address"],
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "type": "Boolean",
+                            "items": {
+                                "$ref": "#/definitions/GetPostalAddresses"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": ["Postal_Address"],
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "parameters": [{
+                    "in": "body",
+                    "name": "body",
+                    "required": true,
+                    "schema": {
+                        "$ref": "#/definitions/UpdatePostalAddress"
+                    }
+                }],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "type": "Boolean",
+                            "items": {
+                                "$ref": "#/definitions/UpdatePostalAddress"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/unit_of_measurements": {
+            "get": {
+                "tags": ["Unit_Of_Measurement"],
+                "consumes": ["application/json"],
+                "produces": ["application/json"],
+                "parameters": [{
+                    "name": "query",
+                    "in": "path",
+                    "required": false,
+                    "type": "string",
+                    "description": "Query to search description by "
+                }],
+                "responses": {
+                    "200": {
+                        "description": "successful operation",
+                        "schema": {
+                            "type": "Boolean",
+                            "items": {
+                                "$ref": "#/definitions/GetUnitOfMeasurements"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "CreateEmailAddress": {
+            "properties": {
+                "contact_purposes": {
+                    "type": "string",
+                    "description": "Comma delimitted string of ContactPurpose internal identifiers to filter by "
+                },
+                "email_address": {
+                    "type": "object",
+                    "description": "EmailAddress record ",
+                    "$ref": "#/definitions/email_address"
+                },
+                "description": {
+                    "type": "string",
+                    "description": "Description of Email Address "
+                },
+                "success": {
+                    "type": "boolean",
+                    "description": "True if the request was successful "
+                }
+            },
+            "required": ["email_address", "description", "success"]
+        },
+        "email_address": {
+            "properties": {
+                "id": {
+                    "type": "number",
+                    "description": "Id of EmailAddress "
+                }
+            },
+            "required": ["id"]
+        },
+        "GetEmailAddresses": {
+            "properties": {
+                "contact_purposes": {
+                    "type": "string",
+                    "description": "Comma delimitted string of ContactPurpose internal identifiers to filter by "
+                },
+                "success": {
+                    "type": "boolean",
+                    "description": "True if the request was successful "
+                },
+                "total_count": {
+                    "type": "number",
+                    "description": "Total count of records based on any filters applied "
+                },
+                "email_addresses": {
+                    "type": "array",
+                    "description": "List of EmailAddress records "
+                }
+            },
+            "required": ["success", "total_count", "email_addresses"]
+        },
+        "email_addresses": {
+            "properties": {
+                "id": {
+                    "type": "number",
+                    "description": "Id of EmailAddress "
+                }
+            },
+            "required": ["id"]
+        },
+        "DeleteEmailAddress": {
+            "properties": {
+                "success": {
+                    "type": "boolean",
+                    "description": "True if the request was successful "
+                }
+            },
+            "required": ["success"]
+        },
+        "UpdateEmailAddress": {
+            "properties": {
+                "contact_purposes": {
+                    "type": "string",
+                    "description": "Comma delimitted string of ContactPurpose internal identifiers to filter by "
+                },
+                "email_address": {
+                    "type": "object",
+                    "description": "EmailAddress record ",
+                    "$ref": "#/definitions/email_address"
+                },
+                "description": {
+                    "type": "string",
+                    "description": "Description of Email Address "
+                },
+                "success": {
+                    "type": "boolean",
+                    "description": "True if the request was successful "
+                }
+            },
+            "required": ["success", "email_address"]
+        },
+        "GetFacilities": {
+            "properties": {
+                "success": {
+                    "type": "boolean",
+                    "description": "True if the request was successful "
+                },
+                "total_count": {
+                    "type": "number",
+                    "description": "Total count of records based on any filters applied "
+                },
+                "facilities": {
+                    "type": "array",
+                    "description": "List of Facility records "
+                }
+            },
+            "required": ["success", "total_count", "facilities"]
+        },
+        "facilities": {
+            "properties": {
+                "id": {
+                    "type": "number",
+                    "description": "Id of Facility "
+                }
+            },
+            "required": ["id"]
+        },
+        "CreateParty": {
+            "properties": {
+                "role_types": {
+                    "type": "string",
+                    "description": "Comma seperated list of RoleType Internal Identifiers to apply to this Party "
+                },
+                "business_party": {
+                    "type": "string",
+                    "description": "Type of Party to create Organization | Individual "
+                },
+                "description": {
+                    "type": "string",
+                    "description": "Description of Party "
+                },
+                "first_name": {
+                    "type": "string",
+                    "description": "First name of Party "
+                },
+                "last_name": {
+                    "type": "string",
+                    "description": "Last name of Party "
+                },
+                "success": {
+                    "type": "boolean",
+                    "description": "True if the request was successful "
+                },
+                "party": {
+                    "type": "object",
+                    "description": "Party record ",
+                    "$ref": "#/definitions/party"
+                }
+            },
+            "required": ["business_party", "description", "first_name", "last_name", "success", "party"]
+        },
+        "party": {
+            "properties": {
+                "id": {
+                    "type": "number",
+                    "description": "Id of Party "
+                }
+            },
+            "required": ["id"]
+        },
+        "GetParties": {
+            "properties": {
+                "role_types": {
+                    "type": "string",
+                    "description": "Comma delimitted string of RoleTypes to filter by "
+                },
+                "id": {
+                    "type": "integer",
+                    "description": "Id of a particular party to filter by "
+                },
+                "include_child_roles": {
+                    "type": "boolean",
+                    "description": "True to include child RoleTypes when filtering by RoleTypes "
+                },
+                "include_descendants": {
+                    "type": "boolean",
+                    "description": "True to include parties that are related to a parent DBA Organization in the result set "
+                },
+                "success": {
+                    "type": "boolean",
+                    "description": "True if the request was successful "
+                },
+                "total_count": {
+                    "type": "number",
+                    "description": "Total count of Party records based on any filters applied "
+                },
+                "parties": {
+                    "type": "array",
+                    "description": "List of Party records "
+                }
+            },
+            "required": ["success", "total_count", "parties"]
+        },
+        "parties": {
+            "properties": {
+                "id": {
+                    "type": "number",
+                    "description": "Id of Party "
+                }
+            },
+            "required": ["id"]
+        },
+        "DeleteParty": {
+            "properties": {
+                "success": {
+                    "type": "boolean",
+                    "description": "True if the request was successful "
+                }
+            },
+            "required": ["success"]
+        },
+        "GetParty": {
+            "properties": {
+                "success": {
+                    "type": "boolean",
+                    "description": "True if the request was successful "
+                },
+                "party": {
+                    "type": "object",
+                    "description": "Party record ",
+                    "$ref": "#/definitions/party"
+                }
+            },
+            "required": ["success", "party"]
+        },
+        "UpdatePartyRoles": {
+            "properties": {
+                "role_type_iids": {
+                    "type": "string",
+                    "description": "Comma seperated list of RoleType Internal Identifiers to apply to this Party "
+                },
+                "success": {
+                    "type": "boolean",
+                    "description": "True if the request was successful "
+                }
+            },
+            "required": ["success"]
+        },
+        "CreatePhoneNumber": {
+            "properties": {
+                "contact_purposes": {
+                    "type": "string",
+                    "description": "Comma delimitted string of ContactPurpose internal identifiers to filter by "
+                },
+                "phone_number": {
+                    "type": "object",
+                    "description": "PhoneNumber record ",
+                    "$ref": "#/definitions/phone_number"
+                },
+                "description": {
+                    "type": "string",
+                    "description": "Description of Email Address "
+                },
+                "success": {
+                    "type": "boolean",
+                    "description": "True if the request was successful "
+                }
+            },
+            "required": ["phone_number", "description", "success"]
+        },
+        "phone_number": {
+            "properties": {
+                "id": {
+                    "type": "number",
+                    "description": "Id of PhoneNumber "
+                }
+            },
+            "required": ["id"]
+        },
+        "GetPhoneNumbers": {
+            "properties": {
+                "contact_purposes": {
+                    "type": "string",
+                    "description": "Comma delimitted string of ContactPurpose internal identifiers to filter by "
+                },
+                "success": {
+                    "type": "boolean",
+                    "description": "True if the request was successful "
+                },
+                "total_count": {
+                    "type": "number",
+                    "description": "Total count of records based on any filters applied "
+                },
+                "phone_numbers": {
+                    "type": "array",
+                    "description": "List of PhoneNumber records "
+                }
+            },
+            "required": ["success", "total_count", "phone_numbers"]
+        },
+        "phone_numbers": {
+            "properties": {
+                "id": {
+                    "type": "number",
+                    "description": "Id of PhoneNumber "
+                }
+            },
+            "required": ["id"]
+        },
+        "DeletePhoneNumber": {
+            "properties": {
+                "success": {
+                    "type": "boolean",
+                    "description": "True if the request was successful "
+                }
+            },
+            "required": ["success"]
+        },
+        "UpdatePhoneNumber": {
+            "properties": {
+                "contact_purposes": {
+                    "type": "string",
+                    "description": "Comma delimitted string of ContactPurpose internal identifiers to filter by "
+                },
+                "phone_number": {
+                    "type": "object",
+                    "description": "PhoneNumber record ",
+                    "$ref": "#/definitions/phone_number"
+                },
+                "description": {
+                    "type": "string",
+                    "description": "Description of Email Address "
+                },
+                "success": {
+                    "type": "boolean",
+                    "description": "True if the request was successful "
+                }
+            },
+            "required": ["success", "phone_number"]
+        },
+        "CreatePostalAddress": {
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "description": "Description of Postal Address "
+                },
+                "contact_purposes": {
+                    "type": "string",
+                    "description": "Comma delimitted string of ContactPurpose internal identifiers to filter by "
+                },
+                "address_line_1": {
+                    "type": "string",
+                    "description": "Address Line 1 "
+                },
+                "city": {
+                    "type": "string",
+                    "description": "City "
+                },
+                "state": {
+                    "type": "string",
+                    "description": "State "
+                },
+                "zip": {
+                    "type": "string",
+                    "description": "Zip "
+                },
+                "country": {
+                    "type": "string",
+                    "description": "Country "
+                },
+                "success": {
+                    "type": "boolean",
+                    "description": "True if the request was successful "
+                },
+                "postal_address": {
+                    "type": "object",
+                    "description": "PostalAddress record ",
+                    "$ref": "#/definitions/postal_address"
+                }
+            },
+            "required": ["description", "address_line_1", "city", "state", "zip", "country", "success", "postal_address"]
+        },
+        "postal_address": {
+            "properties": {
+                "id": {
+                    "type": "number",
+                    "description": "Id of PostalAddress "
+                }
+            },
+            "required": ["id"]
+        },
+        "GetPostalAddresses": {
+            "properties": {
+                "contact_purposes": {
+                    "type": "string",
+                    "description": "Comma delimited string of ContactPurpose internal identifiers to filter by "
+                },
+                "query": {
+                    "type": "string",
+                    "description": "Query to search description by "
+                },
+                "success": {
+                    "type": "boolean",
+                    "description": "True if the request was successful "
+                },
+                "total_count": {
+                    "type": "number",
+                    "description": "Total count of records based on any filters applied "
+                },
+                "postal_addresses": {
+                    "type": "array",
+                    "description": "List of PostalAddress records "
+                }
+            },
+            "required": ["success", "total_count", "postal_addresses"]
+        },
+        "postal_addresses": {
+            "properties": {
+                "id": {
+                    "type": "number",
+                    "description": "Id of PostalAddress "
+                }
+            },
+            "required": ["id"]
+        },
+        "DeletePostalAddress": {
+            "properties": {
+                "success": {
+                    "type": "boolean",
+                    "description": "True if the request was successful "
+                }
+            },
+            "required": ["success"]
+        },
+        "UpdatePostalAddress": {
+            "properties": {
+                "contact_purposes": {
+                    "type": "string",
+                    "description": "Comma delimitted string of ContactPurpose internal identifiers to filter by "
+                },
+                "address_line_1": {
+                    "type": "string",
+                    "description": "Address line 1 "
+                },
+                "address_line_2": {
+                    "type": "string",
+                    "description": "Address line 2 "
+                },
+                "city": {
+                    "type": "string",
+                    "description": "City "
+                },
+                "state": {
+                    "type": "string",
+                    "description": "State "
+                },
+                "zip": {
+                    "type": "string",
+                    "description": "Zip "
+                },
+                "country": {
+                    "type": "string",
+                    "description": "Country "
+                },
+                "description": {
+                    "type": "string",
+                    "description": "Description of Postal Address "
+                },
+                "success": {
+                    "type": "boolean",
+                    "description": "True if the request was successful "
+                },
+                "postal_address": {
+                    "type": "object",
+                    "description": "PostalAddress record ",
+                    "$ref": "#/definitions/postal_address"
+                }
+            },
+            "required": ["success", "postal_address"]
+        },
+        "GetUnitOfMeasurements": {
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": "Query to search description by "
+                },
+                "success": {
+                    "type": "boolean",
+                    "description": "True if the request was successful "
+                },
+                "total_count": {
+                    "type": "number",
+                    "description": "Total count of records based on any filters applied "
+                },
+                "unit_of_measurements": {
+                    "type": "array",
+                    "description": "List of UnitOfMeasurement records "
+                }
+            },
+            "required": ["success", "total_count", "unit_of_measurements"]
+        },
+        "unit_of_measurements": {
+            "properties": {
+                "id": {
+                    "type": "number",
+                    "description": "Id of UnitOfMeasurement "
+                }
+            },
+            "required": ["id"]
+        }
+    }
+}

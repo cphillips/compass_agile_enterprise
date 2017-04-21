@@ -1,4 +1,4 @@
-module Api
+module API
   module V1
     class ProjectsController < BaseController
 
@@ -38,4 +38,4 @@ module Api
 
     end # ProjectsController
   end # V1
-end # Api
+end # API

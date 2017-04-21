@@ -1,4 +1,4 @@
-module Api
+module API
   module V1
     class AuditLogItemsController < BaseController
 
@@ -30,4 +30,4 @@ module Api
 
     end # AuditLogItemsController
   end # V1
-end # Api
+end # API
