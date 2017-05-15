@@ -6,6 +6,9 @@ Rails.application.routes.draw do
       resources :invoices, :defaults => {:format => 'json'} do
         collection do
           post :generate_invoice
+          post :generate_invoices
+          get :print_invoices, defaults: { format: 'html' }
+          get :generate_pdfs
           get :next_invoice_number
           get :customer_credit_cards
         end

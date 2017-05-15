@@ -47,12 +47,41 @@ module API
         render :json => {success: true, invoice_id: invoice.id}
       end
 
+      def generate_invoices
+        # clean up params
+        message = params[:message].blank? ? '' : params[:message].strip
+        invoice_date = Date.strptime(params[:invoice_date], '%m/%d/%Y')
+        due_date = Date.strptime(params[:due_date], '%m/%d/%Y')
+
+        if order_numbers = params[:order_numbers]
+          order_numbers.each do |order_number|
+            Invoice.generate_from_order(OrderTxn.find_by_order_number(order_number),
+                                              {
+                                                dba_organization: current_user.party.dba_organization,
+                                                invoice_date: invoice_date,
+                                                due_date: due_date,
+                                                message: message
+                                              }
+                                              )
+          end
+          render :json => {success: true}
+        end
+      end
+
       def print_invoice
         @invoice = Invoice.find(params[:id])
         @business_module = BusinessModule.find(params[:business_module_id])
 
         set_address_and_logo
 
+        render :invoice
+      end
+
+      def print_invoices
+        invoice_ids = params[:invoice_ids].split(",").compact.reject(&:blank?)
+        @invoices = Invoice.where("id IN (?)", invoice_ids)
+        @business_module = BusinessModule.find(params[:business_module_id])
+        set_address_and_logo
         render :invoice
       end
 
@@ -74,6 +103,27 @@ module API
                   :filename => "Invoice-##{@invoice_file_name}.pdf",
                   :type => "application/pdf",
                   :disposition => "inline")
+      end
+
+      def generate_pdfs
+        invoice_ids = params[:invoice_ids].split(",").compact.reject(&:blank?)
+        @invoices = Invoice.where("id IN (?)", invoice_ids)
+        @business_module = BusinessModule.find(params[:business_module_id])
+        set_address_and_logo
+
+        pdf = WickedPdf.new.pdf_from_string(render_to_string(:layout => false, :action => "invoice_pdf.html.erb"),
+                                            :margin => {:top => 0, :bottom => 15, :left => 10, :right => 10},
+                                            :footer => {
+                                              :right => 'Page [page] of [topage]'
+        })
+
+        @invoice_file_name = "Inv - " + invoice_ids.join('-')
+
+        send_data(pdf,
+                  :filename => "Invoice-##{@invoice_file_name}.pdf",
+                  :type => "application/pdf",
+                  :disposition => "inline")
+
       end
 
       def email_invoice

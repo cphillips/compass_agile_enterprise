@@ -277,7 +277,7 @@ class FileAsset < ActiveRecord::Base
   end
 
   def base64encoded
-    Base64.encode64(get_contents.first())
+    Base64.encode64(get_contents.first()) rescue nil
   end
 
   def is_secured?
