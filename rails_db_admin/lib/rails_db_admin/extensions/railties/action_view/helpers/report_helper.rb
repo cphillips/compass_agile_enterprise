@@ -7,10 +7,13 @@ module RailsDbAdmin
         module Helpers
           module ReportHelper
 
-            def render_report(report_iid)
+            def render_report(report_iid, options={})
               report = Report.iid(report_iid)
 
-              render partial: '/reports/body.html.erb', locals: {report: report}
+              options[:report] = report
+              options[:height] = options[:height] || 'calc(100vh - 30px)'
+
+              render partial: '/reports/body.html.erb', locals: options
             end
 
             def render_report_param(report, param)

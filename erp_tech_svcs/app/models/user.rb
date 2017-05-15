@@ -124,6 +124,69 @@ class User < ActiveRecord::Base
     end
 
     alias scope_by_dba scope_by_dba_organization
+
+    # Find or create a new User
+    #
+    # @param  options [Hash] Options when creating this party
+    # @option options [String] :username Username for new User
+    # @option options [String] :email Email for new User
+    # @option options [String] :password Password for new User
+    # @option options [String] :first_name First Name for new User
+    # @option options [String] :last_name Last Name for new User
+    # @option options [Array] :party_roles Party roles to add to the User
+    # @option options [Array] :security_roles Security Roles to add to the User
+    # @option options [Array] :applications Applications to add to the User
+    # @option options [Party] :tenant Tenant to set for the User
+    # @option options [RelationshipType] :tenant_reln_type RelationshipType to use for the Tenant relationship
+    #
+    # @raise [ExceptionClass] Username is required
+    # @raise [ExceptionClass] Email is required
+    # @raise [ExceptionClass] Password is required
+    # @raise [ExceptionClass] First Name is required
+    # @raise [ExceptionClass] Last Name is required
+    #
+    # @return [User] the found or newly created user
+    def find_or_create(options={})
+      raise 'Username is required' unless options[:username]
+      raise 'Email is required' unless options[:email]
+      raise 'Password is required' unless options[:password]
+      raise 'First Name is required' unless options[:first_name]
+      raise 'Last Name is required' unless options[:last_name]
+      raise 'Tenant is required' unless options[:tenant]
+
+      user = User.where('username = ?', options[:username]).first
+
+      unless user
+        user = create(username: options[:username], email: options[:email], password: options[:password])
+
+        individual = Individual.create(current_first_name: options[:first_name], current_last_name: options[:last_name])
+
+        user.party = individual.party
+        user.save!
+
+        user.party.set_tenant!(options[:tenant], options[:tenant_reln_type])
+
+        if options[:party_roles]
+          options[:party_roles].each do |party_role|
+            user.party.add_role_type(party_role)
+          end
+        end
+
+        if options[:security_roles]
+          options[:security_roles].each do |security_role|
+            user.add_role(security_role)
+          end
+        end
+
+        if options[:applications]
+          options[:applications].each do |application|
+            user.applications << application
+          end
+        end
+      end
+
+      user
+    end
   end
 
   def profile_image
@@ -175,6 +238,22 @@ class User < ActiveRecord::Base
   #
   def auth_token_valid?(token)
     !auth_tokens.where('token = ?', token).valid.first.nil?
+  end
+
+  # Set the auth_token for this User and remove all others
+  #
+  # @param token [String] token to save
+  # @param expires_at [DateTime] DateTime when this token expires
+  def set_auth_token!(token, expires_at)
+    self.revoke_all_auth_tokens
+
+    self.auth_tokens.create(token: token, expires_at: expires_at)
+  end
+
+  # Get the current valid auth token
+  #
+  def current_auth_token
+    self.auth_tokens.valid.first
   end
 
   # This allows the disabling of the activation email sent via the sorcery user_activation submodule

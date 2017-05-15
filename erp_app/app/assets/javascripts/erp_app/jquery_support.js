@@ -53,6 +53,14 @@ if (jQuery) {
     };
 
     Compass.ErpApp.JQuerySupport.showProgressBar = function() {
+        Compass.ErpApp.JQuerySupport.addProgressBar();
+
+        $('#progressBar').modal();
+
+        $(document).unbind('ajax:success', Compass.ErpApp.JQuerySupport.removeProgressBar).bind('ajax:success', Compass.ErpApp.JQuerySupport.removeProgressBar);
+    };
+
+    Compass.ErpApp.JQuerySupport.addProgressBar = function() {
         if ($('#progressBar').length === 0) {
             $(
                 '<div class="modal fade" id="progressBar" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-hidden="true" style="padding-top:15%; overflow-y:visible;">' +
@@ -64,10 +72,6 @@ if (jQuery) {
                 '</div>' +
                 '</div></div></div>').appendTo(document.body);
         }
-
-        $('#progressBar').modal();
-
-        $(document).on('ajax:success', Compass.ErpApp.JQuerySupport.removeProgressBar);
     };
 
     Compass.ErpApp.JQuerySupport.removeProgressBar = function() {

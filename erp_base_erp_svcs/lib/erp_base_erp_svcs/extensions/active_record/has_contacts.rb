@@ -183,7 +183,7 @@ module ErpBaseErpSvcs
               contact_mechanisms = find_all_contacts_by_contact_mechanism(contact_mechanism_klass)
               contact_mechanisms.each do |contact_mechanism|
                 data = contact_mechanism.to_data_hash
-                data[:contact_purpose] = contact_mechanism.contact.contact_purpose.first.internal_identifier
+                data[:contact_purpose] = contact_mechanism.contact.contact_purposes.first.internal_identifier
 
                 contact_mechanisms_data.push(data)
               end

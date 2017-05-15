@@ -246,6 +246,30 @@ class FileAsset < ActiveRecord::Base
     super attributes.merge(:directory => directory, :name => name, :data => data)
   end
 
+  def update_contents!(contents)
+    self.data = contents
+
+    # update data_file_name as it sets it to string.io
+    self.update_attribute(:data_file_name, self.name)
+
+    self.save!
+  end
+
+  def rename!(new_name)
+    file_support = ErpTechSvcs::FileSupport::Base.new(:storage => ErpTechSvcs::Config.file_storage)
+
+    result, message = file_support.rename_file(File.join(file_support.root, directory, name), new_name)
+
+    if result
+      self.name = new_name
+      self.save!
+
+      return true, nil
+    else
+      return false, message
+    end
+  end
+
   def fully_qualified_url
     case ErpTechSvcs::Config.file_storage
     when :filesystem

@@ -22,7 +22,6 @@ module RailsDbAdmin
         def create
           begin
             ActiveRecord::Base.transaction do
-
               if params[:report_data].present?
                 Report.import(params[:report_data])
                 render :inline => {:success => true}.to_json
@@ -94,8 +93,8 @@ module RailsDbAdmin
                 # assign report roles
                 report_roles.split(',').each do |role_type|
                   report.add_party_with_role(
-                      current_user.party.dba_organization,
-                      RoleType.iid(role_type)
+                    current_user.party.dba_organization,
+                    RoleType.iid(role_type)
                   ) unless available_role_types.include?(role_type.to_sym)
                 end
               end
@@ -158,6 +157,20 @@ module RailsDbAdmin
           else
             render :json => {:success => false}
           end
+        end
+
+        def export_all
+          tmp_dir = Report.make_tmp_dir
+          (tmp_dir + "reports.zip").tap do |file_name|
+            file_name.unlink if file_name.exist?
+            Zip::ZipFile.open(file_name.to_s, Zip::ZipFile::CREATE) do |zip|
+              Report.all.each.each do |report|
+                zip.add("#{report.name}[#{report.internal_identifier}].zip", report.export.to_s)
+              end
+            end
+          end
+
+          send_file((tmp_dir + "reports.zip"), :stream => false) rescue raise "Error sending #{zip_path} file"
         end
 
         def export
@@ -343,19 +356,19 @@ module RailsDbAdmin
 
             ['stylesheets', 'images', 'templates', 'javascripts', 'query'].each do |resource_folder|
               report_data[:children] << {
-                  :reportId => report.id,
-                  :reportName => report.name,
-                  :reportIid => report.internal_identifier,
-                  :text => resource_folder.titleize,
-                  :iconCls => case resource_folder
-                                when 'query'
-                                  'icon-query'
-                                else
-                                  'icon-content'
-                              end,
-                  :id => "#{report.url}/#{resource_folder}",
-                  :leaf => (resource_folder == 'query'),
-                  :handleContextMenu => (resource_folder == 'query') || (resource_folder == 'preview_report')
+                :reportId => report.id,
+                :reportName => report.name,
+                :reportIid => report.internal_identifier,
+                :text => resource_folder.titleize,
+                :iconCls => case resource_folder
+                when 'query'
+                  'icon-query'
+                else
+                  'icon-content'
+                end,
+                :id => "#{report.url}/#{resource_folder}",
+                :leaf => (resource_folder == 'query'),
+                :handleContextMenu => (resource_folder == 'query') || (resource_folder == 'preview_report')
               }
             end
 
@@ -389,20 +402,20 @@ module RailsDbAdmin
         def build_report_data(report)
           meta_data = report.meta_data || {}
           meta_data.merge!({
-                               params: report.meta_data['params'] || [],
-                               roles: report.role_types.pluck(:internal_identifier).join(','),
-                           })
+                             params: report.meta_data['params'] || [],
+                             roles: report.role_types.pluck(:internal_identifier).join(','),
+          })
 
           {
-              text: report.name,
-              reportName: report.name,
-              reportId: report.id,
-              internalIdentifier: report.internal_identifier,
-              iconCls: 'icon-content',
-              isReport: true,
-              handleContextMenu: true,
-              children: [],
-              reportMetaData: meta_data
+            text: report.name,
+            reportName: report.name,
+            reportId: report.id,
+            internalIdentifier: report.internal_identifier,
+            iconCls: 'icon-content',
+            isReport: true,
+            handleContextMenu: true,
+            children: [],
+            reportMetaData: meta_data
           }
         end
 

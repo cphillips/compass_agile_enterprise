@@ -1,17 +1,10 @@
 class Create<%=class_name %>DesktopApplication
   def self.up
-    app = DesktopApplication.create(
+    DesktopApplication.create(
       :description => '<%=description %>',
       :icon => '<%=icon %>',
-      :javascript_class_name => 'Compass.ErpApp.Desktop.Applications.<%=class_name %>',
-      :internal_identifier => '<%=file_name %>',
-      :shortcut_id => '<%=file_name %>-win'
+      :internal_identifier => '<%=file_name %>'
     )
-
-    app.preference_types << PreferenceType.iid('desktop_shortcut')
-    app.preference_types << PreferenceType.iid('autoload_application')
-    app.save
-
   end
 
   def self.down

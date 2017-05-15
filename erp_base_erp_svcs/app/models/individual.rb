@@ -59,7 +59,7 @@ class Individual < ActiveRecord::Base
 
   # Get dba_organzation info eventually going to be tenant
   def dba_organization
-    self.party.dba_organization
+    self.try(:party).try(:dba_organization)
   end
   alias :tenant :dba_organization
 

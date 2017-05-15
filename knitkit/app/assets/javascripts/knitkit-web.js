@@ -19,5 +19,6 @@
 //= require ./knitkit/bootstrap-tagsinput
 //= require ./knitkit/js.cookie
 //= require ./knitkit/captcha
+//= require ./knitkit/jsrender.min.js
 //= require moment
 //= require bootstrap-datetimepicker

@@ -4,6 +4,7 @@
 #    t.references :party
 #    t.datetime :from_date
 #    t.datetime :thru_date
+#    t.column :comments, :string
 #
 #    t.timestamps
 #  end

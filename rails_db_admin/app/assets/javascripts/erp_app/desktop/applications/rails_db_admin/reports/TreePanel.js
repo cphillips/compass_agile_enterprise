@@ -326,12 +326,22 @@ Ext.define("Compass.ErpApp.Desktop.Applications.RailsDbAdmin.Reports.TreePanel",
                                 }
                             }
                         }, {
-                            text: "Upload",
+                            text: "Import",
                             iconCls: 'icon-theme-upload',
                             listeners: {
                                 'click': function() {
                                     me.uploadReport();
                                 }
+                            }
+                        }, {
+                            text: 'Export All',
+                            iconCls: 'icon-website-export',
+                            handler: function() {
+                                var waitMsg = Ext.Msg.wait("Exporting Reports...", "Status");
+
+                                window.open('/rails_db_admin/erp_app/desktop/reports/export_all', '_blank');
+
+                                waitMsg.hide();
                             }
                         });
                     } else if (node.data.isReport) {

@@ -115,6 +115,7 @@ module ErpTechSvcs
       def get_contents(path)
         contents = nil
         message = nil
+
         unless File.exists? path
           message = FILE_DOES_NOT_EXIST
         else

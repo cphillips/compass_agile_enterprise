@@ -8,29 +8,35 @@ module ErpApp
             def render_widget(name, opts={})
               action = opts[:action] || :index
               params = opts[:params].nil? ? {} : opts[:params]
-
+              render_inline = opts[:render_inline] === false ? false : true
+         
               uuid = Digest::SHA1.hexdigest(Time.now.to_s + rand(10000).to_s)
 
-              #render widget
-              widget_obj = "::Widgets::#{name.to_s.camelize}::Base".constantize.new(self.controller, name.to_s, action.to_s, uuid, params, nil)
-              result = widget_obj.process(action.to_s)
+              if render_inline
+                #render widget
+                widget_obj = "::Widgets::#{name.to_s.camelize}::Base".constantize.new(self.controller, name.to_s, action.to_s, uuid, params, nil)
+                result = widget_obj.process(action.to_s)
 
-              html = "<div id=\"#{uuid}\" class='compass_ae-widget'>"
-              html << result
-              html << "</div>"
-              html << "<script type='text/javascript'>"
-              html << "Compass.ErpApp.Widgets.LoadedWidgets.push({id:'#{uuid}',name:'#{name.to_s}',action:'#{action.to_s}',params:#{params.to_json}});"
-              html << "</script>"
+                html = "<div id=\"#{uuid}\" class='compass_ae-widget'>"
+                html << result
+                html << "</div>"
+                html << "<script type='text/javascript'>"
+                html << "Compass.ErpApp.Widgets.LoadedWidgets.push({id:'#{uuid}',name:'#{name.to_s}',action:'#{action.to_s}',params:#{params.to_json}});"
+                html << "</script>"
+
+              else
+                html = "<div id=\"#{uuid}\" class='compass_ae-widget'>Loading ...<script type=\"text/javascript\">Compass.ErpApp.Widgets.setup('#{uuid}', '#{name}', '#{action}', #{params.to_json}, true);</script></div>"
+              end
 
               raw html
             end
 
             def build_widget_url(action, id=nil, params={})
               url = if id
-                      "/erp_app/widgets/#{@name}/#{action}/#{@uuid}/#{id}"
-                    else
-                      "/erp_app/widgets/#{@name}/#{action}/#{@uuid}"
-                    end
+                "/erp_app/widgets/#{@name}/#{action}/#{@uuid}/#{id}"
+              else
+                "/erp_app/widgets/#{@name}/#{action}/#{@uuid}"
+              end
 
               if params
                 url = "#{url}?"

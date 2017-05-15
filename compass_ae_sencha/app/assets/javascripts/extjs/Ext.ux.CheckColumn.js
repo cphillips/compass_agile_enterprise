@@ -103,7 +103,7 @@ Ext.define('Ext.ux.CheckColumn', {
 
     // Note: class names are not placed on the prototype bc renderer scope
     // is not in the header.
-    renderer : function(value){
+    renderer: function(value) {
         var cssPrefix = Ext.baseCSSPrefix,
             cls = [cssPrefix + 'grid-checkheader'];
 

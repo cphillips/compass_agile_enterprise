@@ -31,25 +31,11 @@ module API
         role_types = params[:role_types]
 
         query_filter = params[:query_filter].blank? ? {} : Hash.symbolize_keys(JSON.parse(params[:query_filter]))
+
+        query_filter[:query] = query
  
         # hook method to apply any scopes passed via parameters to this api
         parties = Party.apply_filters(query_filter)
-
-        unless query.blank?
-          parties_tbl = Party.arel_table
-
-          where_clause = nil
-          # if the query has commas split on the commas and treat them as separate search terms
-          query.split(',').each do |query_part|
-            if where_clause.nil?
-              where_clause = parties_tbl[:description].matches(query_part.strip + '%')
-            else
-              where_clause = where_clause.or(parties_tbl[:description].matches(query_part.strip + '%'))
-            end
-          end
-
-          parties = parties.where(where_clause)
-        end
 
         unless params[:id].blank?
           parties = parties.where(id: params[:id].split(','))

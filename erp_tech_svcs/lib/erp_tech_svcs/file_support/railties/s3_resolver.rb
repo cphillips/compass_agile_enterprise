@@ -17,7 +17,6 @@ module ActionView
     alias :== :eql?
 
     def cached(key, path_info, details, locals) #:nodoc:
-      file_support = ErpTechSvcs::FileSupport::Base.new(:storage => :s3)
       name, prefix, partial = path_info
       locals = locals.map { |x| x.to_s }.sort!
 
@@ -26,10 +25,16 @@ module ActionView
           @cached[key][name][prefix][partial][locals] = decorate(yield, path_info, details, locals)
         else
           @cached[key][name][prefix][partial][locals].each do |template|
-            @cached[key][name][prefix][partial][locals].delete_if{|item| item.identifier == template.identifier}
+            file_asset = FileAsset.select('data_updated_at').where('directory = ? and data_file_name = ?', File.dirname(template.identifier), template.identifier.split('/').last).first
+
             #check if the file still exists
-            if file_support.exists? template.identifier
-              @cached[key][name][prefix][partial][locals] << build_template(template.identifier, template.virtual_path, (details[:formats] || [:html] if template.formats.empty?), file_support, template.locals)
+            if file_asset
+              if file_asset.data_updated_at > template.updated_at
+                @cached[key][name][prefix][partial][locals].delete_if{|item| item.identifier == template.identifier}
+                @cached[key][name][prefix][partial][locals] << build_template(template.identifier, template.virtual_path, (details[:formats] || [:html] if template.formats.empty?), file_support, template.locals)
+              end
+            else
+              @cached[key][name][prefix][partial][locals].delete_if{|item| item.identifier == template.identifier}
             end
           end
           @cached[key][name][prefix][partial][locals]
@@ -40,9 +45,9 @@ module ActionView
 
         scope = @cached[key][name][prefix][partial]
         cache = scope[locals]
-        mtime = cache && cache.map(&:updated_at).max
+        _mtime = cache && cache.map(&:updated_at).max
 
-        if !mtime || fresh.empty?  || fresh.any? { |t| t.updated_at > mtime }
+        if !_mtime || fresh.empty?  || fresh.any? { |t| t.updated_at > _mtime }
           scope[locals] = fresh
         else
           cache
@@ -51,30 +56,29 @@ module ActionView
     end
 
     def query(path, details, formats, outside_app_allowed=nil)
-      file_support = ErpTechSvcs::FileSupport::Base.new(:storage => :s3)
       templates = []
-      get_dir_entries(path, file_support).each{|p|templates << build_template(p, path.virtual, formats, file_support)}
+      get_dir_entries(path).each{|p|templates << build_template(p, path.virtual, formats)}
       templates
     end
 
-    def get_dir_entries(path, file_support)
+    def get_dir_entries(path)
       full_path = File.join(@path, path)
-      node = file_support.find_node(File.dirname(full_path))
-      node.nil? ? [] : node[:children].select{|child| child[:leaf]}.collect{|child| child[:id]}.select{|p|!p.scan(full_path).empty?}
-    end
 
-    def mtime(p, file_support)
-      p = p.sub(%r{^/}, '')
-      ErpTechSvcs::FileSupport::S3Manager.new.bucket.objects[p].last_modified
+      file_asset = FileAsset.where("concat(directory, '/', name) ilike ?", full_path + '%').first
+
+      (file_asset ? [File.join(file_asset.directory, file_asset.data_file_name)] : [])
     end
 
     protected
 
-    def build_template(p, virtual_path, formats, file_support, locals=nil)
+    def build_template(p, virtual_path, formats, locals=nil)
       handler, format = extract_handler_and_format(p, formats)
-      contents, message = file_support.get_contents(p)
-      
-      Template.new(contents, p, handler, :virtual_path => virtual_path, :format => format, :updated_at => mtime(p, file_support), :locals => locals)
+
+      file_asset = FileAsset.where("concat(directory, '/', name) ilike ?", p + '%').first
+
+      contents, message = file_asset.get_contents
+
+      Template.new(contents, p, handler, :virtual_path => virtual_path, :format => format, :updated_at => file_asset.data_updated_at, :locals => locals)
     end
   end
 end

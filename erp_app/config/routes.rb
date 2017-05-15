@@ -130,6 +130,8 @@ ErpApp::Engine.routes.draw do
       resources :types do
         collection do
           post 'reorder'
+          post 'import'
+          get 'export'
         end
       end
     end

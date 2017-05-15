@@ -11,6 +11,14 @@ class RelationshipType < ActiveRecord::Base
   # find existing role type or create it and return it.  Parent can be passed
   # which will scope this type by the parent
   def self.find_or_create(to_role_type, from_role_type, parent=nil)
+    if to_role_type.is_a? String 
+      to_role_type = RoleType.iid(to_role_type)
+    end
+
+    if from_role_type.is_a? String 
+      from_role_type = RoleType.iid(from_role_type)
+    end
+
     relationship_type = if parent
                           parent.children.where('valid_to_role_type_id = ? and valid_from_role_type_id = ?',
                                                 to_role_type, from_role_type).first

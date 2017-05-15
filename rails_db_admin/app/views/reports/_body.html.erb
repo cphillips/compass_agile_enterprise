@@ -1,4 +1,4 @@
-<div style="padding: 10px 0 10px 0;">
+<div>
   <form class="form-inline" style="padding-bottom:10px;" id="<%=report.internal_identifier%>reportParamsForm">
   <% if report.meta_data['params'] %>
     <% report.meta_data['params'].each do |param| %>
@@ -7,7 +7,9 @@
   <% end %>
   </form> 
 
-  <%= render partial: '/reports/buttons.html.erb', locals: {report: report} %>
+  <% if !report.meta_data['auto_execute'] || (report.meta_data['auto_execute'] && report.meta_data['params']) %>
+    <%= render partial: '/reports/buttons.html.erb', locals: {report: report} %>
+  <% end %>
   
   <style>
   
@@ -17,8 +19,8 @@
 
    .report-iframe{
    	border: none;
-   	display:block;
-    height: calc(100vh - 30px); 
+   	display: block;
+    height: <%= height %>; 
     width: 100%;
    }
 

@@ -31,6 +31,11 @@ class BizTxnEvent < ActiveRecord::Base
   has_many :biz_txn_agreement_roles
   has_many :agreements, :through => :biz_txn_agreement_roles
 
+  has_many :from_biz_txn_event_relationships, class_name: 'BizTxnRelationship', foreign_key: 'txn_event_id_from'
+  has_many :to_biz_txn_event_relationships, class_name: 'BizTxnRelationship', foreign_key: 'txn_event_id_to'
+  has_many :from_biz_txn_events, through: :to_biz_txn_event_relationships, source: :txn_event_from
+  has_many :to_biz_txn_events, through: :from_biz_txn_event_relationships, source: :txn_event_to
+
   before_destroy :destroy_biz_txn_relationships
 
   #wrapper for...
@@ -45,6 +50,10 @@ class BizTxnEvent < ActiveRecord::Base
   alias :account :biz_txn_acct_root
   alias :account= :biz_txn_acct_root=
   alias :descriptions :biz_txn_event_descs
+  alias :from_txn_relns :from_biz_txn_event_relationships
+  alias :to_txn_relns :to_biz_txn_event_relationships
+  alias :from_txns :from_biz_txn_events
+  alias :to_txns :to_biz_txn_events
 
   class << self
     # Filter records

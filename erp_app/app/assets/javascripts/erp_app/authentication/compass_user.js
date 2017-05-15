@@ -22,6 +22,7 @@ ErpApp.CompassAccessNegotiator.CompassUser = function(user) {
     this.id = user.id;
     this.username = user.username;
     this.roles = user.roles;
+    this.roleTypes = user.roleTypes;
     this.capabilities = user.capabilities;
     this.lastloginAt = user.lastloginAt;
     this.lastActivityAt = user.lastActivityAt;
@@ -31,6 +32,32 @@ ErpApp.CompassAccessNegotiator.CompassUser = function(user) {
     this.profileImageUrl = user.profileImageUrl;
     this.partyId = user.partyId;
     this.dbaOrganizationId = user.dbaOrganizationId;
+
+    /**
+     * Checks to see if the passed roles exists in this.roles
+     * @param {String or Array} internal_identifier of role or array of internal_identifiers
+     */
+    this.hasRoleType = function(roleType) {
+        var result = false;
+
+        if (roleType instanceof Array) {
+            var self = this;
+            for (var i = 0; i < roleType.length; i++) {
+                if (self.hasRoleType(roleType[i])) {
+                    result = true;
+                    break;
+                }
+            }
+        } else {
+            if (this.roleTypes.contains(roleType)) {
+                result = true;
+            } else {
+                result = false;
+            }
+        }
+
+        return result;
+    };
 
     /**
      * Checks to see if the passed roles exists in this.roles

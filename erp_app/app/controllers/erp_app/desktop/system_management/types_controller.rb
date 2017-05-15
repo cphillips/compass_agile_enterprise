@@ -196,6 +196,245 @@ module ErpApp
           render json: {success: reordered}
         end
 
+        def export
+          begin
+            types_hash = []
+
+            if params[:export_all]
+
+              #
+              # Export all ERP type data
+              #
+              erp_types = ErpBaseErpSvcs::Extensions::ActiveRecord::ActsAsErpType.models
+
+              erp_types.each do |erp_type|
+                hash = {
+                    erp_type: erp_type,
+                    data: []
+                }
+
+                if erp_type.constantize.respond_to? (:roots)
+                  types = erp_type.constantize.roots.all
+                else
+                  types = erp_type.constantize.all
+                end
+
+                types.each do |type|
+                  hash[:data].push(build_type_node(type))
+                end
+
+                types_hash.push(hash)
+              end
+            else
+              hash = {
+                  erp_type: params[:klass],
+                  data: []
+              }
+
+              #
+              # Export specified erp type or record and its children
+              #
+              if params[:id].nil?
+                if params[:klass].constantize.respond_to? (:roots)
+                  types = params[:klass].constantize.roots.all
+                else
+                  types = params[:klass].constantize.all
+                end
+              else
+                types = [params[:klass].constantize.find(params[:id])]
+              end
+
+              types.each do |type|
+                hash[:data].push(build_type_node(type))
+              end
+
+              types_hash.push(hash)
+            end
+
+            #
+            # Export and create zip file
+            #
+            tmp_dir = Pathname.new(Rails.root.to_s + "/tmp/erp_types/tmp_#{Time.now.to_i.to_s}/").tap do |dir|
+              FileUtils.mkdir_p(dir) unless dir.exist?
+            end
+
+            Zip::ZipFile.open(tmp_dir + "ERPTypes.zip", Zip::ZipFile::CREATE) do |zipfile|
+              zipfile.get_output_stream("erp_types.yml") { |f| f.puts types_hash.to_yaml }
+            end
+
+            zip_path = (tmp_dir + "ERPTypes.zip")
+
+            send_file(zip_path.to_s, :stream => false) rescue raise "Error sending #{zip_path} file"
+
+          rescue => ex
+            Rails.logger.error ex.message
+            Rails.logger.error ex.backtrace.join("\n")
+
+            # email error
+            ExceptionNotifier.notify_exception(ex) if defined? ExceptionNotifier
+
+            raise "Error sending file"
+          end
+        end
+
+        def import
+          begin
+            file_path = params[:erp_type_data]
+            unless file_path.is_a?(String)
+              if file_path.path
+                file_path = file_path.path
+              else
+                file = ActionController::UploadedTempfile.new("uploaded-erp-type").tap do |f|
+                  f.puts file_path.read
+                  f.original_filename = file_path.original_filename
+                  f.read # no idea why we need this here, otherwise the zip can't be opened
+                end
+                file_path = file.path
+              end
+            end
+
+            erp_types_hash = nil
+            tmp_dir = Pathname.new(Rails.root.to_s + "/tmp/module_templates/tmp_#{Time.now.to_i.to_s}/").tap do |dir|
+              FileUtils.mkdir_p(dir) unless dir.exist?
+            end
+
+            Zip::ZipFile.open(file_path) do |zip|
+              zip.each do |entry|
+                f_path = File.join(tmp_dir.to_s, entry.name)
+                FileUtils.mkdir_p(File.dirname(f_path))
+                zip.extract(entry, f_path) unless File.exist?(f_path)
+
+                next if entry.name =~ /__MACOSX\//
+                if entry.name =~ /erp_types.yml/
+                  data = ''
+                  entry.get_input_stream { |io| data = io.read }
+                  data = StringIO.new(data) if data.present?
+                  erp_types_hash = YAML.load(data)
+                end
+              end
+            end
+
+            FileUtils.rm_rf(tmp_dir.to_s)
+
+            ActiveRecord::Base.transaction do
+              erp_types_hash.each do |erp_type_data|
+                erp_type = erp_type_data[:erp_type].constantize
+                create_type_records(erp_type_data[:data], erp_type, nil)
+              end
+
+              render :json => {success: true}
+            end
+          rescue StandardError => ex
+            Rails.logger.error ex.message
+            Rails.logger.error ex.backtrace.join("\n")
+
+            ExceptionNotifier.notify_exception(ex) if defined? ExceptionNotifier
+
+            render :json => {success: false, message: ex.message}
+          end
+        end
+
+        private
+
+        def create_type_records(data, erp_type, parent=nil)
+          unless data.nil?
+            data.each do |child|
+              if erp_type.iid(child[:internal_identifier]).nil?
+
+                #
+                # Check if this model has valid to/from roles that needs to be imported
+                #
+                if erp_type.column_names.include? "valid_from_role_type_id"
+                  to_role_type_id = nil
+                  from_role_type_id = nil
+
+                  unless child[:valid_from_role_type_iid].nil?
+                    from_role_type = RoleType.iid(child[:valid_from_role_type_iid])
+
+                    if from_role_type.nil?
+                      from_role_type = RoleType.create(:description => child[:valid_from_role_type_description], :internal_identifier => child[:valid_from_role_type_iid] )
+                    end
+
+                    from_role_type_id = from_role_type.id
+                  end
+
+                  unless child[:valid_to_role_type_iid].nil?
+                    to_role_type = RoleType.iid(child[:valid_to_role_type_iid])
+
+                    if to_role_type.nil?
+                      to_role_type = RoleType.create(:description => child[:valid_to_role_type_description], :internal_identifier => child[:valid_to_role_type_iid] )
+                    end
+
+                    to_role_type_id = to_role_type.id
+                  end
+
+                  record = erp_type.create(:description => child[:description], :internal_identifier => child[:internal_identifier], :valid_from_role_type_id => from_role_type_id, :valid_to_role_type_id => to_role_type_id)
+                else
+                  record = erp_type.create(:description => child[:description], :internal_identifier => child[:internal_identifier])
+                end
+              else
+                record = erp_type.iid(child[:internal_identifier])
+              end
+
+              unless parent.nil?
+                record.move_to_child_of(parent)
+              end
+
+              create_type_records(child[:children], erp_type, record)
+            end
+          end
+        end
+
+        def build_type_node(type)
+
+          #
+          # Recursively builds data nodes for each erp type record with following attributes
+          # {
+          #   :internal_identifier => text,
+          #   :description => text,
+          #   :children => array of child nodes
+          # }
+          #
+          if type.respond_to? :valid_from_role_type_id
+            from_role = nil
+            to_role = nil
+
+            #
+            # Include valid to/from role type data if applicable
+            #
+            unless type.valid_from_role_type_id.nil?
+              from_role = RoleType.find(type.valid_from_role_type_id)
+            end
+            unless type.valid_to_role_type_id.nil?
+              to_role = RoleType.find(type.valid_to_role_type_id)
+            end
+
+            node = {
+                internal_identifier: type.internal_identifier,
+                description: type.description,
+                valid_from_role_type_iid: from_role.nil? ? nil : from_role.internal_identifier,
+                valid_from_role_type_description: from_role.nil? ? nil : from_role.description,
+                valid_to_role_type_iid: to_role.nil? ? nil : to_role.internal_identifier,
+                valid_to_role_type_description: to_role.nil? ? nil : to_role.description,
+                children: []
+            }
+          else
+            node = type.to_hash(:only => [:internal_identifier,
+                                   :description],
+                         children: [])
+          end
+
+          if !type.respond_to?(:leaf) or type.leaf?
+            node = node.except(:children)
+          else
+            type.children.each do |t|
+              node[:children].push(build_type_node(t))
+            end
+          end
+
+          node
+        end
+
       end #BaseController
     end #SystemManagement
   end #Desktop

@@ -25,14 +25,46 @@ class Report < ActiveRecord::Base
 
     def import(file)
       ActiveRecord::Base.transaction do
-        name_and_iid = file.original_filename.to_s.gsub(/(^.*(\\|\/))|(\.zip$)/, '')
-        report_name = name_and_iid.split('[').first
-        report_iid = name_and_iid.split('[').last.gsub(']', '')
-        return false unless valid_report?(file)
-        Report.skip_callback(:create, :after, :create_report_files!)
-        report = Report.create(:name => report_name, :internal_identifier => report_iid)
-        report.import(file)
-        Report.set_callback(:create, :after, :create_report_files!)
+        result = validate_import?(file)
+
+        if result[:valid]
+          Report.skip_callback(:create, :after, :create_report_files!)
+
+          if result[:type] == :multiple
+            tmp_dir = Report.make_tmp_dir
+
+            Zip::ZipFile.open(file.path) do |zip|
+              zip.entries.each do |entry|
+                ::File.open(tmp_dir + entry.name, 'wb+') { |f| entry.get_input_stream { |io| f.puts io.read } }
+
+                name_and_iid = entry.name.to_s.gsub(/(^.*(\\|\/))|(\.zip$)/, '')
+                report_name = name_and_iid.split('[').first
+                report_iid = name_and_iid.split('[').last.gsub(']', '')
+
+                if Report.where(internal_identifier: report_iid).first
+                  Report.where(internal_identifier: report_iid).first.destroy
+                end
+
+                report = Report.create(:name => report_name, :internal_identifier => report_iid)
+                report.import(::File.open(tmp_dir + entry.name))
+
+                FileUtils.rm_f(tmp_dir + entry.name)
+              end
+            end
+          else
+            name_and_iid = file.original_filename.to_s.gsub(/(^.*(\\|\/))|(\.zip$)/, '')
+            report_name = name_and_iid.split('[').first
+            report_iid = name_and_iid.split('[').last.gsub(']', '')
+
+            report = Report.create(:name => report_name, :internal_identifier => report_iid)
+            report.import(file)
+          end
+
+          Report.set_callback(:create, :after, :create_report_files!)
+
+        else
+          false
+        end
       end
     end
 
@@ -42,16 +74,29 @@ class Report < ActiveRecord::Base
       end
     end
 
-    def valid_report?(file)
-      valid = false
+    def validate_import?(file)
+      result = {valid: false}
+
       Zip::ZipFile.open(file.path) do |zip|
-        zip.sort.each do |entry|
-          entry.name.split('/').each do |file|
-            valid = true if REPORT_STRUCTURE.include?(file)
+        # check if this is a zip of report exports
+        if zip.entries.find{|item| item.name.include?('.zip')}
+          result[:type] = :multiple
+          # make sure there are only zip files in here
+          if zip.entries.collect{|item| File.extname(item.name)}.uniq == ['.zip']
+            result[:valid] = true
+          end
+        else
+          result[:type] = :single
+          # valid the report zip
+          zip.sort.each do |entry|
+            entry.name.split('/').each do |_file|
+              result[:valid] = true if REPORT_STRUCTURE.include?(_file)
+            end
           end
         end
       end
-      valid
+
+      result
     end
   end
 

@@ -32,7 +32,7 @@ class WorkEffortPartyAssignment < ActiveRecord::Base
   belongs_to :party
   belongs_to :role_type
 
-  validates_uniqueness_of :party_id, scope: [:work_effort_id, :role_type_id]
+  #validates_uniqueness_of :party_id, scope: [:work_effort_id, :role_type_id]
 
   has_tracked_status
   tracks_created_by_updated_by

@@ -133,6 +133,32 @@ module API
 
 =begin
 
+  @api {get} /api/v1/order_txns/:id/parties Parties
+  @apiVersion 1.0.0
+  @apiName GetParties
+  @apiGroup OrderTxn
+
+  @apiParam {String} role_type Comma separated list of role types
+  @apiParam {String} include_phone_number True to include phone numbers for parties
+
+  @apiSuccess {Boolean} success True if the request was successful
+  @apiSuccess {Array} parties Parties that were found
+
+=end
+
+      def parties
+        order_txn = OrderTxn.find(params[:id])
+
+        parties = Party.joins(biz_txn_party_roles: :biz_txn_party_role_type).where(biz_txn_party_roles: {biz_txn_event_id: order_txn.root_txn.id})
+
+        if params[:role_type]
+          parties = parties.where(biz_txn_party_role_types: {internal_identifier: params[:role_type].split(',')})
+        end
+
+        render :json => {:success => true, parties: parties.collect{|party| party.to_data_hash(include_phone_number: params[:include_phone_number])}}
+      end
+
+=begin
   @api {put} /api/v1/order_txns/:id/related_order_txns RelatedOrders
   @apiVersion 1.0.0
   @apiName RelatedOrderTxns

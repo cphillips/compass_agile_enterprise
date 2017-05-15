@@ -1,3 +1,17 @@
+# create_table :parties do |t|
+#   t.column :description, :string
+#   t.column :business_party_id, :integer
+#   t.column :business_party_type, :string
+#   t.column :list_view_image_id, :integer
+#
+#   #This field is here to provide a direct way to map CompassAE
+#   #business parties to unified idenfiers in organizations if they
+#   #have been implemented in an enterprise.
+#   t.column :enterprise_identifier, :string
+#   t.timestamps
+# end
+# add_index :parties, [:business_party_id, :business_party_type], :name => "besi_1"
+
 class Party < ActiveRecord::Base
   attr_protected :created_at, :updated_at
 
@@ -28,6 +42,24 @@ class Party < ActiveRecord::Base
     def apply_filters(filters, statement=nil)
       statement = statement || Party
 
+      if filters[:query]
+        parties_tbl = Party.arel_table
+
+        where_clause = nil
+        # if the query has commas split on the commas and treat them as separate search terms
+        filters[:query].split(',').each do |query_part|
+          if where_clause.nil?
+            where_clause = parties_tbl[:description].matches(query_part.strip + '%')
+            .or(Party.arel_table[:enterprise_identifier].matches(query_part.strip + '%'))
+          else
+            where_clause = where_clause.or(parties_tbl[:description].matches(query_part.strip + '%'))
+            .or(Party.arel_table[:enterprise_identifier].matches(query_part.strip + '%'))
+          end
+        end
+
+        statement = statement.where(where_clause)
+      end
+
       if filters[:role_types]
         if filters[:include_child_roles]
           role_types = RoleType.find_child_role_types(filters[:role_types].split(',')).collect{|role_type| role_type.internal_identifier}
@@ -36,6 +68,10 @@ class Party < ActiveRecord::Base
         end
 
         statement = statement.joins(party_roles: :role_type).where('role_types.internal_identifier' => role_types)
+      end
+
+      if filters[:enterprise_identifier]
+        statement = statement.where(Party.arel_table[:enterprise_identifier].matches("#{filters[:enterprise_identifier]}%"))
       end
 
       if filters[:email_address]
@@ -70,7 +106,7 @@ class Party < ActiveRecord::Base
             where = ::PostalAddress.arel_table[key].eq("#{value}")
           end
         end
- 
+
         statement = statement.where(where)
       end
 
@@ -89,6 +125,8 @@ class Party < ActiveRecord::Base
       .where({party_relationships: {party_id_to: dba_organization}})
     end
 
+    alias :by_tenant :scope_by_dba_organization
+
     # Scopes parties by passed role types
     #
     # @param role_types [Array, RoleType] Array of RoleTypes to scope by
@@ -105,6 +143,35 @@ class Party < ActiveRecord::Base
     find_related_parties_with_role('dba_org').first
   end
   alias :tenant :dba_organization
+
+  # if dba_org exists, delete it and replace it
+  # if it doesn't exist, create it
+  #
+  # @param party party of the dba org for this party
+  def set_dba_org(to_party_id, reln_type=nil,  description="DBA Organization")
+    if to_party_id.is_a? Party
+      to_party_id = to_party_id.id
+    end
+
+    if dba_organization
+      dba_party_relationship = find_relationship_by_role_type('dba_org')
+      unless dba_party_relationship.nil?
+        dba_party_relationship.delete
+      end
+    end
+
+    reln_type ||= RelationshipType.iid('employee_to_dba_org')
+
+    create_relationship(description, to_party_id, reln_type)
+  end
+
+  alias :set_tenant! :set_dba_org
+
+  def find_relationship_by_role_type(role_type_iid)
+    PartyRelationship.includes(:relationship_type).
+      where('party_id_from = ? or party_id_to = ?', id, id).
+      where('role_type_id_to' => RoleType.iid(role_type_iid)).first
+  end
 
   # Get any child DBA Organizations related this party
   #
@@ -164,6 +231,7 @@ class Party < ActiveRecord::Base
 
     dba_orgs.uniq
   end
+
 
   # Gathers all party relationships that contain this particular party id
   # in either the from or to side of the relationship.
@@ -258,6 +326,7 @@ class Party < ActiveRecord::Base
                      :id,
                      :description,
                      :created_at,
+                     :enterprise_identifier,
                      :updated_at
                    ],
                    business_party_type: business_party.class.name

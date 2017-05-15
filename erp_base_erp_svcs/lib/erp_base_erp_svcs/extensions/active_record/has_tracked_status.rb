@@ -192,7 +192,7 @@ module ErpBaseErpSvcs
           # set current status of entity.
           #
           # @param args [String, TrackedStatusType, Array] This can be a string of the internal identifier of the
-          # TrackedStatusType to set, a TrackedStatusType instance, or three params the status, options and party_id
+          # TrackedStatusType to set, a TrackedStatusType instance, or four params the status, options, party_id, comments
           def current_status=(args)
             options = {}
 
@@ -200,6 +200,7 @@ module ErpBaseErpSvcs
               status = args[0]
               options = args[1]
               party_id = args[2]
+              comments = args[3]
             else
               status = args
             end
@@ -224,6 +225,7 @@ module ErpBaseErpSvcs
               status_application.tracked_status_type = tracked_status_type
               status_application.from_date = options[:from_date].nil? ? Time.now : options[:from_date]
               status_application.party_id = party_id
+              status_application.comments = comments
               status_application.save
 
               self.status_applications << status_application

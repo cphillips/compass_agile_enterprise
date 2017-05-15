@@ -7,6 +7,7 @@ Rails.application.routes.draw do
         member do
           put :update_status
           get :related_order_txns
+          get :parties
         end
         resources :charge_lines
       end

@@ -10,12 +10,12 @@ module ErpRules
         def self.invoke(rule_book, context)
           engine :engine do |e|
             rule_book.new(e).rules
-
             e.assert context
             e.match
             e.retract context
           end
           context
+
         end
 
       end
