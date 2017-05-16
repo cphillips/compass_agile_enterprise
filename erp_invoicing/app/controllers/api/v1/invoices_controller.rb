@@ -47,6 +47,7 @@ module API
         render :json => {success: true, invoice_id: invoice.id}
       end
 
+      ## generate invoice for all selected orders
       def generate_invoices
         # clean up params
         message = params[:message].blank? ? '' : params[:message].strip
@@ -77,6 +78,7 @@ module API
         render :invoice
       end
 
+      ## print all selected invoices
       def print_invoices
         invoice_ids = params[:invoice_ids].split(",").compact.reject(&:blank?)
         @invoices = Invoice.where("id IN (?)", invoice_ids)
@@ -105,6 +107,7 @@ module API
                   :disposition => "inline")
       end
 
+      ## generate pdf for all selected invoices
       def generate_pdfs
         invoice_ids = params[:invoice_ids].split(",").compact.reject(&:blank?)
         @invoices = Invoice.where("id IN (?)", invoice_ids)
