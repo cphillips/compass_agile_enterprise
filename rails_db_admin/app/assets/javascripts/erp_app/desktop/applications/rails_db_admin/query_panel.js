@@ -178,7 +178,8 @@ Ext.define("Compass.ErpApp.Desktop.Applications.RailsDbAdmin.QueryPanel", {
                         var reportParamsPanel = me.down('reportparamspanel'),
                             reportParamsWithValues = encodeURIComponent(JSON.stringify(reportParamsPanel.getReportParams())),
                             url = '/compass_ae_reports/display/' + me.report.get('internalIdentifier') + '.csv?report_params=' + reportParamsWithValues;
-                        window.open(url);
+
+                        window.open(url, '_blank');
                     }
                 }
             });
@@ -191,8 +192,31 @@ Ext.define("Compass.ErpApp.Desktop.Applications.RailsDbAdmin.QueryPanel", {
                         var reportParamsPanel = me.down('reportparamspanel'),
                             reportParamsWithValues = encodeURIComponent(JSON.stringify(reportParamsPanel.getReportParams())),
                             url = '/compass_ae_reports/display/' + me.report.get('internalIdentifier') + '.pdf?report_params=' + reportParamsWithValues;
+
                         window.open(url, '_blank');
                     }
+                }
+            });
+        } else {
+            tbarItems.push({
+                text: 'Download CSV',
+                iconCls: 'icon-website-export',
+                handler: function() {
+                    var textarea = me.query('.codemirror')[0];
+                    var sql = textarea.getValue();
+                    var selected_sql = textarea.getSelection();
+                    var cursor_pos = textarea.getCursor().line;
+                    var database = me.module.getDatabase();
+
+                    var params = {
+                        database: database,
+                        cursor_pos: cursor_pos,
+                        sql: sql,
+                        selected_sql: selected_sql,
+                        authenticity_token: Compass.ErpApp.AuthentictyToken
+                    };
+
+                    Compass.ErpApp.Utility.openWindow('POST', '/rails_db_admin/erp_app/desktop/queries/download_csv', params, '_blank');
                 }
             });
         }
