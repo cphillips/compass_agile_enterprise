@@ -275,6 +275,16 @@ class ProductType < ActiveRecord::Base
     product_type_pty_roles.where(role_type_id: role_types).first.try(:party)
   end
 
+  def find_parties_by_role(role_types)
+    unless role_types.is_a? Array
+      role_types = [role_types]
+    end
+
+    role_types = RoleType.find_child_role_types(role_types)
+
+    Party.joins(:product_type_pty_roles).where(product_type_pty_roles: {product_type_id: self.id, role_type_id: role_types})
+  end
+
   def has_dimensions?
     (cylindrical && length && width && weight) or (length && width && height && weight)
   end

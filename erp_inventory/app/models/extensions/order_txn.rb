@@ -61,7 +61,7 @@ OrderTxn.class_eval do
   end
 
   def add_inventory_entry_line_item(inventory_entry, options)
-    line_item = get_line_item_for_inventory_entry(options)
+    line_item = get_line_item_for_inventory_entry(inventory_entry, options)
 
     if line_item
       line_item.quantity += 1
