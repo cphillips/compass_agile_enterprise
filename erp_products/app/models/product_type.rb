@@ -278,7 +278,136 @@ class ProductType < ActiveRecord::Base
   def has_dimensions?
     (cylindrical && length && width && weight) or (length && width && height && weight)
   end
+
+  def generate_variants
+
+    dba_org_role_type = RoleType.iid('dba_org')
+
+    product_features = []
+    product_feature_applicabilities.each do |product_feature_applicability|
+      product_feature = product_feature_applicability.product_feature
+      feature_type_and_value = {}
+      feature_type_and_value[:type_id] = product_feature.product_feature_type_id
+      feature_type_and_value[:value_id]  = product_feature.product_feature_value_id
+      product_features << feature_type_and_value
+    end
+
+    # get an array of unique type ids
+    unique_type_ids = product_features.map {|product_feature| product_feature[:type_id]}.uniq
+
+
+    # get the value ids for each type
+    value_sets = []
+    unique_type_ids.each do |type_id|
+      value_set = []
+      product_features.each do |product_feature|
+        if product_feature[:type_id] == type_id
+          value_set << product_feature[:value_id]
+        end
+      end
+      value_sets << value_set
+    end
+
+    # get the unique permutations of each value id set
+    permutations = value_sets.inject(&:product).map(&:flatten)
+
+    # get the product features for each unique combination of values
+    product_feature_sets = []
+    permutations.each do |permutation|
+      product_feature_set = []
+      permutation.each do |value_id|
+        product_feature = ProductFeature.find_by_product_feature_value_id(value_id)
+        product_feature_set << product_feature
+      end
+      product_feature_sets << product_feature_set
+    end
+
+    parent_variant_product_type = self
+    prod_type_reln_type = ProdTypeRelnType.find_by_internal_identifier('product_type_base_to_variant_relationship')
+    base_product_role_type = RoleType.iid('base_product')
+    variant_product_role_type = RoleType.iid('variant_product')
+
+    # for each feature set, create a variant product type and relate it to the base product
+    product_feature_sets.each do |variant_features_set|
+
+      sku = "v" + rand(1234567).to_s
+
+      variant_product_type = ProductType.create(
+          description: "#{self.description} Variant Product",
+          internal_identifier: "#{self.internal_identifier}_variant_#{sku}",
+          revenue_gl_account_id: self.revenue_gl_account_id,
+          expense_gl_account_id: self.expense_gl_account_id,
+          sku: sku,
+          is_base: false
+      )
+
+      variant_product_type.move_to_child_of(parent_variant_product_type)
+
+      variant_features_set.each do |variant_feature|
+        ProductFeatureApplicability.create(
+            is_mandatory: true,
+            feature_of_record_type: 'ProductType',
+            feature_of_record_id: variant_product_type.id,
+            product_feature_id: variant_feature.id
+        )
+      end
+
+      # grab that cost from the custom field on self
+      cost = ActiveSupport::JSON.decode(self.custom_fields['cost'])
+      variant_custom_fields = {}
+      variant_custom_fields['cost'] = cost
+      variant_product_type.custom_fields = variant_custom_fields
+
+      # add default pricing that matches the base product
+      # add pricing plan
+      pricing_plan = PricingPlan.new
+      pricing_plan.description = "#{variant_product_type.description} Pricing Plan"
+      pricing_plan.internal_identifier = "#{variant_product_type.internal_identifier}_pricing_plan"
+      pricing_plan.is_simple_amount = true
+      pricing_plan.money_amount = self.get_current_simple_plan.money_amount
+      pricing_plan.save
+
+      variant_product_type.pricing_plans << pricing_plan
+      variant_product_type.save
+
+      # bind the variant product back to the base product
+      ProdTypeReln.create(
+          prod_type_reln_type_id: prod_type_reln_type,
+          description: 'Base Product to Variant Product',
+          prod_type_id_to: self.id,
+          prod_type_id_from: variant_product_type.id,
+          role_type_id_to: base_product_role_type.id,
+          role_type_id_from: variant_product_role_type.id
+      )
+
+      # create a ProductTypePtyRole for each variant
+      ProductTypePtyRole.create(
+            # use the party id of the base product
+            party_id: self.product_type_pty_roles.first.party_id,
+            role_type_id: dba_org_role_type.id,
+            product_type_id: variant_product_type.id
+      )
+    end
+  end
+
+
+  def product_feature_values
+    product_values = []
+    product_feature_applicabilities.each do |product_feature_applicabiity|
+      product_feature = ProductFeature.find(product_feature_applicabiity.product_feature_id)
+      product_values << ProductFeatureValue.find(product_feature.product_feature_value_id).description
+    end
+    product_values.join(",")
+  end
+
+  def has_features?
+    product_feature_applicabilities.count > 0 ? true : false
+  end
+
+
+
 end
+
 
 module Arel
   class SelectManager

@@ -62,8 +62,17 @@ module API
       def show
         product_type = ProductType.find(params[:id])
 
-        render :json => {success: true,
-                         product_type: product_type.to_data_hash}
+        respond_to do |format|
+          # if a tree format was requested then respond with the children of this ProductType
+          format.tree do
+            render :json => {success: true, product_types: ProductType.where(parent_id: product_type).order("sequence ASC").collect { |child| child.to_data_hash }}
+          end
+
+          # if a json format was requested then respond with the ProductType in json format
+          format.json do
+            render :json => {success: true, product_type: product_type.to_data_hash}
+          end
+        end
       end
 
       def create
